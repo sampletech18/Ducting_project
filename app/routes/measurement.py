@@ -1,10 +1,9 @@
 from flask import Blueprint, render_template, request, redirect, url_for, jsonify
 from flask_login import login_required
 from app import db
-from models import Project, Measurement
+from app.models import Project, Measurement  # ✅ Corrected import
 
 measurement_bp = Blueprint('measurement', __name__, url_prefix='/measurement')
-
 
 @measurement_bp.route('/sheet/<int:project_id>')
 @login_required
@@ -12,7 +11,6 @@ def measurement_sheet(project_id):
     project = Project.query.get_or_404(project_id)
     entries = Measurement.query.filter_by(project_id=project_id).all()
     return render_template('measurement_sheet.html', project=project, entries=entries)
-
 
 @measurement_bp.route('/add-measurement/<int:project_id>', methods=['POST'])
 @login_required
@@ -60,19 +58,15 @@ def add_measurement(project_id):
     except Exception as e:
         return jsonify({'success': False, 'message': str(e)})
 
-
 @measurement_bp.route('/submit/<int:project_id>')
 @login_required
 def submit_measurement(project_id):
-    # Handle submission logic here
     return redirect(url_for('measurement.measurement_sheet', project_id=project_id))
-
 
 @measurement_bp.route('/export/pdf/<int:project_id>')
 @login_required
 def export_pdf(project_id):
     return f"PDF Export for Project {project_id}"
-
 
 @measurement_bp.route('/export/excel/<int:project_id>')
 @login_required
