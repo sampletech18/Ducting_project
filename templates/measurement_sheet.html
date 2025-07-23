@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Measurement Sheet</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <style>
+    .form-section {
+      background: #f9f9f9;
+      border-radius: 10px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+    .table-wrapper {
+      overflow-x: auto;
+    }
+  </style>
+</head>
+<body>
+<div class="container-fluid mt-4">
+  <div class="row">
+    <!-- Left Side: AutoCAD Viewer & Upload -->
+    <div class="col-md-4">
+      <div class="form-section">
+        <h5>Drawing Upload</h5>
+        <form>
+          <div class="mb-2">
+            <label>Source Drawing</label>
+            <input type="file" class="form-control">
+          </div>
+          <div class="mb-2">
+            <label>Revision Drawing</label>
+            <input type="file" class="form-control">
+          </div>
+        </form>
+        <div class="mt-3">
+          <h6>Preview</h6>
+          <div class="border p-3 bg-light text-center" style="height:200px;">AutoCAD Viewer Placeholder</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Side: Duct Entry Form -->
+    <div class="col-md-8">
+      <div class="form-section">
+        <h5>Duct Entry</h5>
+        <form id="ductForm" class="row g-2">
+          <div class="col-md-2"><input type="text" name="duct_no" class="form-control" placeholder="Duct No" required></div>
+          <div class="col-md-2"><input type="text" name="type" class="form-control" placeholder="Type" required></div>
+          <div class="col-md-1"><input type="number" name="w1" class="form-control" placeholder="W1" required></div>
+          <div class="col-md-1"><input type="number" name="h1" class="form-control" placeholder="H1" required></div>
+          <div class="col-md-1"><input type="number" name="w2" class="form-control" placeholder="W2"></div>
+          <div class="col-md-1"><input type="number" name="h2" class="form-control" placeholder="H2"></div>
+          <div class="col-md-2"><input type="text" name="offset" class="form-control" placeholder="Degree/Offset"></div>
+          <div class="col-md-2"><input type="text" name="length" class="form-control" placeholder="Length/Radius"></div>
+          <div class="col-md-1"><input type="number" name="qty" class="form-control" placeholder="Qty" required></div>
+          <div class="col-md-1"><input type="text" name="factor" class="form-control" placeholder="Factor (opt)"></div>
+          <div class="col-md-2 d-flex gap-2">
+            <button type="button" class="btn btn-success btn-sm" onclick="addEntry()">Add</button>
+            <button type="reset" class="btn btn-secondary btn-sm">Cancel</button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Live Table -->
+      <div class="form-section table-wrapper">
+        <h5>Live Measurement Table</h5>
+        <table class="table table-bordered table-sm text-center align-middle" id="entryTable">
+          <thead class="table-secondary">
+            <tr>
+              <th>Duct No</th><th>Type</th><th>W1</th><th>H1</th><th>W2</th><th>H2</th><th>Offset</th><th>Length</th>
+              <th>Qty</th><th>Area</th><th>24G</th><th>22G</th><th>20G</th><th>18G</th>
+              <th>Nuts & Bolts</th><th>Cleat</th><th>Gasket</th><th>Corner</th><th>Actions</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+        <div class="d-flex gap-2 mt-3">
+          <button class="btn btn-primary btn-sm" onclick="submitData()">Submit</button>
+          <button class="btn btn-outline-primary btn-sm" onclick="exportTable()">Export</button>
+          <button class="btn btn-outline-dark btn-sm" onclick="window.print()">Print</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function addEntry() {
+  const form = document.getElementById('ductForm');
+  const data = new FormData(form);
+  const table = document.querySelector('#entryTable tbody');
+
+  const row = document.createElement('tr');
+  const values = {
+    duct_no: data.get('duct_no'),
+    type: data.get('type'),
+    w1: data.get('w1'),
+    h1: data.get('h1'),
+    w2: data.get('w2'),
+    h2: data.get('h2'),
+    offset: data.get('offset'),
+    length: data.get('length'),
+    qty: data.get('qty'),
+    area: '-', g24: '-', g22: '-', g20: '-', g18: '-',
+    nuts: '-', cleat: '-', gasket: '-', corner: '-'
+  };
+
+  row.innerHTML = `
+    <td>${values.duct_no}</td><td>${values.type}</td><td>${values.w1}</td><td>${values.h1}</td>
+    <td>${values.w2}</td><td>${values.h2}</td><td>${values.offset}</td><td>${values.length}</td>
+    <td>${values.qty}</td><td>${values.area}</td><td>${values.g24}</td><td>${values.g22}</td>
+    <td>${values.g20}</td><td>${values.g18}</td><td>${values.nuts}</td><td>${values.cleat}</td>
+    <td>${values.gasket}</td><td>${values.corner}</td>
+    <td>
+      <button class="btn btn-warning btn-sm" onclick="editRow(this)">Edit</button>
+      <button class="btn btn-danger btn-sm" onclick="deleteRow(this)">Delete</button>
+    </td>
+  `;
+  table.appendChild(row);
+  form.reset();
+}
+
+function editRow(btn) {
+  const row = btn.closest("tr");
+  const cells = row.querySelectorAll("td");
+  row.dataset.original = row.innerHTML;
+
+  for (let i = 0; i < cells.length - 1; i++) {
+    const text = cells[i].innerText;
+    cells[i].innerHTML = `<input class="form-control form-control-sm" value="${text}">`;
+  }
+
+  cells[cells.length - 1].innerHTML = `
+    <button class="btn btn-sm btn-success" onclick="saveRow(this)">Save</button>
+    <button class="btn btn-sm btn-secondary" onclick="cancelEdit(this)">Cancel</button>
+  `;
+}
+
+function saveRow(btn) {
+  const row = btn.closest("tr");
+  const cells = row.querySelectorAll("td");
+
+  for (let i = 0; i < cells.length - 1; i++) {
+    const input = cells[i].querySelector("input");
+    if (input) cells[i].innerText = input.value;
+  }
+
+  cells[cells.length - 1].innerHTML = `
+    <button class="btn btn-warning btn-sm" onclick="editRow(this)">Edit</button>
+    <button class="btn btn-danger btn-sm" onclick="deleteRow(this)">Delete</button>
+  `;
+}
+
+function cancelEdit(btn) {
+  const row = btn.closest("tr");
+  row.innerHTML = row.dataset.original;
+}
+
+function deleteRow(btn) {
+  if (confirm("Are you sure you want to delete this row?")) {
+    btn.closest("tr").remove();
+  }
+}
+
+function exportTable() {
+  let csv = [];
+  const rows = document.querySelectorAll("table tr");
+  for (let row of rows) {
+    const cols = row.querySelectorAll("td, th");
+    const rowData = Array.from(cols).map(cell => `"${cell.innerText.trim()}"`).join(",");
+    csv.push(rowData);
+  }
+  const csvFile = new Blob([csv.join("\n")], { type: "text/csv" });
+  const link = document.createElement("a");
+  link.href = URL.createObjectURL(csvFile);
+  link.download = "measurement_sheet.csv";
+  link.click();
+}
+
+function submitData() {
+  alert("Submitting data (backend logic coming soon)");
+}
+</script>
+
+</body>
+</html>
