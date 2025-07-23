@@ -1,124 +1,80 @@
 from flask import Blueprint, render_template, request, redirect, url_for, jsonify
-from flask_login import login_required, current_user
-from app.models import db
-from app.models import Measurement, Project
-import math
+from flask_login import login_required
+from app import db
+from models import Project, Measurement
 
 measurement_bp = Blueprint('measurement', __name__, url_prefix='/measurement')
 
+
 @measurement_bp.route('/sheet/<int:project_id>')
 @login_required
-def sheet(project_id):
+def measurement_sheet(project_id):
     project = Project.query.get_or_404(project_id)
-    entries = MeasurementEntry.query.filter_by(project_id=project_id).all()
+    entries = Measurement.query.filter_by(project_id=project_id).all()
     return render_template('measurement_sheet.html', project=project, entries=entries)
+
 
 @measurement_bp.route('/add-measurement/<int:project_id>', methods=['POST'])
 @login_required
 def add_measurement(project_id):
     data = request.get_json()
-    
-    try:
-        duct_no = data.get('duct_no')
-        duct_type = data.get('duct_type')
-        w1 = int(data.get('w1') or 0)
-        h1 = int(data.get('h1') or 0)
-        w2 = int(data.get('w2') or 0)
-        h2 = int(data.get('h2') or 0)
-        length_radius = int(data.get('length_radius') or 0)
-        degree_offset = int(data.get('degree_offset') or 0)
-        quantity = int(data.get('quantity') or 1)
-        factor = float(data.get('factor') or 1)
+    if not data:
+        return jsonify({'success': False, 'message': 'No data received'})
 
-        # Gauge Selection
-        max_dim = max(w1, h1)
-        if max_dim <= 750:
+    try:
+        w1 = float(data.get('w1') or 0)
+        h1 = float(data.get('h1') or 0)
+        area = round((w1 * h1) / 1000000, 2)
+        gauge = ''
+        if w1 <= 751 and h1 <= 751:
             gauge = '24g'
-        elif max_dim <= 1200:
+        elif w1 <= 1201 and h1 <= 1201:
             gauge = '22g'
-        elif max_dim <= 1800:
+        elif w1 <= 1800 and h1 <= 1800:
             gauge = '20g'
         else:
             gauge = '18g'
 
-        area = 0
-        if duct_type == 'st':
-            area = 2 * (w1 + h1) / 1000 * (length_radius / 1000) * quantity
-        elif duct_type == 'red':
-            area = (w1 + h1 + w2 + h2) / 1000 * (length_radius / 1000) * quantity * factor
-        elif duct_type == 'dm':
-            area = (w1 * h1) / 1_000_000 * quantity
-        elif duct_type == 'offset':
-            area = (w1 + h1 + w2 + h2) / 1000 * ((length_radius + degree_offset) / 1000) * quantity * factor
-        elif duct_type == 'shoe':
-            area = ((w1 + h1) * 2) / 1000 * (length_radius / 1000) * quantity * factor
-        elif duct_type == 'vanes':
-            area = (w1 / 1000) * (2 * math.pi * (w1 / 1000) / 4) * quantity
-        elif duct_type == 'elb':
-            area = 2 * (w1 + h1) / 1000 * ((h1 / 2) / 1000 + (length_radius / 1000) * math.pi * (degree_offset / 180)) * quantity * factor
-
-        area = round(area, 2)
-
-        # Calculated fields
-        cleat = math.ceil(area * 2)
-        gasket = math.ceil(area * 2)
-        bolts = math.ceil(area * 1.5)
-        corner = math.ceil(quantity * 4)
-
-        entry = MeasurementEntry(
+        entry = Measurement(
             project_id=project_id,
-            duct_no=duct_no,
-            duct_type=duct_type,
+            duct_no=data.get('duct_no'),
+            duct_type=data.get('duct_type'),
             w1=w1,
             h1=h1,
-            w2=w2,
-            h2=h2,
-            length_radius=length_radius,
-            degree_offset=degree_offset,
-            quantity=quantity,
-            factor=factor,
+            w2=float(data.get('w2') or 0),
+            h2=float(data.get('h2') or 0),
+            length=float(data.get('length') or 0),
+            degree_offset=float(data.get('degree_offset') or 0),
+            quantity=int(data.get('quantity') or 1),
+            factor=float(data.get('factor') or 1),
             gauge=gauge,
             area=area,
-            cleat=cleat,
-            gasket=gasket,
-            bolts=bolts,
-            corner=corner,
-            created_by=current_user.id
+            cleat=area * 0.1,
+            bolts=area * 0.05,
+            gasket=area * 0.08,
+            corner=area * 0.02
         )
-
         db.session.add(entry)
         db.session.commit()
-
-        return jsonify({'success': True, 'message': 'Entry added successfully'})
-    
+        return jsonify({'success': True})
     except Exception as e:
-        return jsonify({'success': False, 'message': str(e)}), 400
+        return jsonify({'success': False, 'message': str(e)})
 
-@measurement_bp.route('/get-entries/<int:project_id>', methods=['GET'])
+
+@measurement_bp.route('/submit/<int:project_id>')
 @login_required
-def get_entries(project_id):
-    entries = MeasurementEntry.query.filter_by(project_id=project_id).all()
-    result = []
+def submit_measurement(project_id):
+    # Handle submission logic here
+    return redirect(url_for('measurement.measurement_sheet', project_id=project_id))
 
-    for e in entries:
-        result.append({
-            'id': e.id,
-            'duct_no': e.duct_no,
-            'duct_type': e.duct_type,
-            'w1': e.w1,
-            'h1': e.h1,
-            'w2': e.w2,
-            'h2': e.h2,
-            'length_radius': e.length_radius,
-            'degree_offset': e.degree_offset,
-            'quantity': e.quantity,
-            'factor': e.factor,
-            'gauge': e.gauge,
-            'area': e.area,
-            'cleat': e.cleat,
-            'gasket': e.gasket,
-            'bolts': e.bolts,
-            'corner': e.corner,
-        })
 
-    return jsonify(result)
+@measurement_bp.route('/export/pdf/<int:project_id>')
+@login_required
+def export_pdf(project_id):
+    return f"PDF Export for Project {project_id}"
+
+
+@measurement_bp.route('/export/excel/<int:project_id>')
+@login_required
+def export_excel(project_id):
+    return f"Excel Export for Project {project_id}"
