@@ -20,20 +20,22 @@ class Vendor(db.Model):
     gst = db.Column(db.String(50))
     address = db.Column(db.String(250))
 
-class MeasurementEntry(db.Model):
+
+class Project(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    duct_no = db.Column(db.String(50))
-    type = db.Column(db.String(50))
-    w1 = db.Column(db.Float)
-    h1 = db.Column(db.Float)
-    w2 = db.Column(db.Float)
-    h2 = db.Column(db.Float)
-    offset = db.Column(db.String(50))
-    length = db.Column(db.String(50))
-    qty = db.Column(db.Integer)
-    factor = db.Column(db.String(20))
-    project_id = db.Column(db.Integer, db.ForeignKey('project.id'))  # ← Important!
+    enquiry_id = db.Column(db.String(100))
+    quotation = db.Column(db.String(200))
+    start_date = db.Column(db.String(50))
+    end_date = db.Column(db.String(50))
+    location = db.Column(db.String(100))
+    vendor_id = db.Column(db.Integer, db.ForeignKey('vendor.id'))
+    vendor = db.relationship('Vendor', backref='projects')
+    incharge = db.Column(db.String(100))
+    contact = db.Column(db.String(100))
+    email = db.Column(db.String(100))
+    notes = db.Column(db.String(300))
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
 
 class MeasurementEntry(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -47,7 +49,7 @@ class MeasurementEntry(db.Model):
     length = db.Column(db.String(50))
     qty = db.Column(db.Integer)
     factor = db.Column(db.String(20))
-    project_id = db.Column(db.Integer, db.ForeignKey('project.id'))  # <-- Add this line
+    project_id = db.Column(db.Integer, db.ForeignKey('project.id'))
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
 # ========== USERS (Dummy) ==========
@@ -140,10 +142,10 @@ def add_measurement():
         return redirect(url_for('login'))
 
     try:
-        project_id = int(request.form['project_id'])  # 👈 get project_id
+        project_id = int(request.form['project_id'])
 
         new_entry = MeasurementEntry(
-            project_id=project_id,  # 👈 store project_id
+            project_id=project_id,
             duct_no=request.form['duct_no'],
             type=request.form['duct_type'],
             w1=float(request.form['w1']),
@@ -188,7 +190,8 @@ def submit_measurements():
                 offset=item.get('offset'),
                 length=item.get('length'),
                 qty=item.get('qty'),
-                factor=item.get('factor')
+                factor=item.get('factor'),
+                project_id=item.get('project_id')  # must be included from frontend
             )
             db.session.add(entry)
         db.session.commit()
