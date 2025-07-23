@@ -66,9 +66,20 @@ def new_project():
 @project_bp.route('/measurement_sheet/<int:project_id>')
 def measurement_sheet(project_id):
     project = Project.query.get_or_404(project_id)
-    return render_template('measurement_sheet.html', project=project)
 
+    # Dummy totals if no entries yet (will be overwritten when entries are added)
+    totals = {
+        'g24': 0,
+        'g22': 0,
+        'g20': 0,
+        'g18': 0,
+        'cleat': 0,
+        'bolt': 0,
+        'gasket': 0,
+        'corner': 0
+    }
 
+    return render_template('measurement_sheet.html', project=project, totals=totals)
 # -------------------------------
 # Route: Seed Dummy Vendors (TEMP)
 # -------------------------------
