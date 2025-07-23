@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, session
+from flask import Flask, render_template, request, redirect, url_for, session, jsonify
 from flask_sqlalchemy import SQLAlchemy
 import random
 from datetime import datetime
@@ -35,7 +35,22 @@ class Project(db.Model):
 
     vendor = db.relationship('Vendor', backref='projects')
 
+class MeasurementEntry(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    duct_no = db.Column(db.String(50))
+    type = db.Column(db.String(50))
+    w1 = db.Column(db.Float)
+    h1 = db.Column(db.Float)
+    w2 = db.Column(db.Float)
+    h2 = db.Column(db.Float)
+    offset = db.Column(db.String(50))
+    length = db.Column(db.String(50))
+    qty = db.Column(db.Integer)
+    factor = db.Column(db.String(20))
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
 # ========== USERS (Dummy) ==========
+
 users = {
     'admin': {'password': 'admin123', 'role': 'admin'},
     'vendor1': {'password': 'vendor123', 'role': 'vendor'},
@@ -117,13 +132,45 @@ def vendor_register():
         return "Vendor Registered Successfully!"
     return render_template('vendor_register.html')
 
+
+@app.route('/measurement_sheet')
+def measurement_sheet():
+    if 'username' not in session:
+        return redirect(url_for('login'))
+    return render_template('measurement_sheet.html')
+
+
+@app.route('/submit_measurements', methods=['POST'])
+def submit_measurements():
+    try:
+        data = request.json.get('entries', [])
+        for item in data:
+            entry = MeasurementEntry(
+                duct_no=item.get('duct_no'),
+                type=item.get('type'),
+                w1=item.get('w1'),
+                h1=item.get('h1'),
+                w2=item.get('w2'),
+                h2=item.get('h2'),
+                offset=item.get('offset'),
+                length=item.get('length'),
+                qty=item.get('qty'),
+                factor=item.get('factor')
+            )
+            db.session.add(entry)
+        db.session.commit()
+        return jsonify({'message': 'Data saved successfully'}), 200
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': str(e)}), 400
+
+
 @app.route('/init_db')
 def init_db():
     try:
-        db.drop_all()  # 🔥 CAREFUL: Deletes all tables!
-        db.create_all()  # Create tables fresh
+        db.drop_all()
+        db.create_all()
 
-        # Add sample vendors
         sample_vendors = [
             Vendor(name="Perfect Fabricators", gst="29ABCDE1234F1Z5", address="Chennai, TN"),
             Vendor(name="Duct Tech Engineers", gst="29FGHIJ5678K9Z5", address="Coimbatore, TN"),
@@ -135,6 +182,8 @@ def init_db():
         return "✅ Database reset & vendors added successfully!"
     except Exception as e:
         return f"❌ Failed: {str(e)}"
+
+
 # ========== Run ==========
 if __name__ == '__main__':
     with app.app_context():
