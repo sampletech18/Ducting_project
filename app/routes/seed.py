@@ -10,7 +10,6 @@ def seed_vendors():
         Vendor(name="XYZ Metals", gst_number="GST5678", address="Coimbatore"),
         Vendor(name="LMN Fabricators", gst_number="GST9012", address="Madurai")
     ]
-
     db.session.bulk_save_objects(dummy_vendors)
     db.session.commit()
     return jsonify({"message": "Dummy vendors added successfully!"})
