@@ -1,6 +1,6 @@
 from flask import Flask, request, jsonify, redirect, url_for
 from flask_login import LoginManager
-from .models import db
+from .models import db, User  # ✅ Import User
 import os
 
 def create_app():
@@ -21,7 +21,12 @@ def create_app():
     login_manager.login_view = 'auth.login'
     login_manager.init_app(app)
 
-    # ✅ Fix: Return JSON for unauthorized AJAX
+    # ✅ Add this user_loader function
+    @login_manager.user_loader
+    def load_user(user_id):
+        return User.query.get(int(user_id))
+
+    # ✅ Handle unauthorized AJAX
     @login_manager.unauthorized_handler
     def unauthorized():
         if request.accept_mimetypes.accept_json and not request.accept_mimetypes.accept_html:
