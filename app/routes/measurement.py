@@ -112,7 +112,29 @@ def create_measurement():
     db.session.add(entry)
     db.session.commit()
 
-    return jsonify({'message': 'Measurement added successfully'}), 201
+    return jsonify({
+    'success': True,
+    'entry': {
+        'duct_no': entry.duct_no,
+        'duct_type': entry.duct_type,
+        'w1': entry.w1,
+        'h1': entry.h1,
+        'w2': entry.w2,
+        'h2': entry.h2,
+        'length': entry.length,
+        'degree': entry.degree,
+        'quantity': entry.quantity,
+        'gauge': entry.gauge,
+        'g24': entry.g24,
+        'g22': entry.g22,
+        'g20': entry.g20,
+        'g18': entry.g18,
+        'cleat': entry.cleat,
+        'nuts_bolts': entry.nuts_bolts,
+        'gasket': entry.gasket,
+        'corner': entry.corner
+    }
+}), 201
 
 # ------------------------------------
 # Get All Entries
