@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify
-from models import db, Measurement
+from app.models import db, Measurement
 from math import pi
 
 measurement_bp = Blueprint('measurement', __name__)
