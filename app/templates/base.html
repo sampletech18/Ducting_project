@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>{% block title %}Dashboard{% endblock %}</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    .sidebar {
+      height: 100vh;
+      background: #f0f0f0;
+      padding: 15px;
+    }
+    .content {
+      padding: 15px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container-fluid">
+    <div class="row">
+      <!-- Sidebar -->
+      <div class="col-md-3 sidebar">
+        <h4>Modules</h4>
+        <ul class="nav flex-column">
+          <li class="nav-item"><strong>Enquiry</strong></li>
+          <li class="nav-item"><a class="nav-link" href="/enquiry/new">New Project</a></li>
+          <li class="nav-item"><a class="nav-link" href="/enquiry/progress">Progress</a></li>
+          <li class="nav-item"><a class="nav-link" href="/enquiry/summary">Summary</a></li>
+
+          <li class="nav-item mt-3"><strong>Production</strong></li>
+          <li class="nav-item"><a class="nav-link" href="/production/preparation">Preparation</a></li>
+          <li class="nav-item"><a class="nav-link" href="/production/summary">Summary</a></li>
+          <li class="nav-item"><a class="nav-link" href="/production/sheet-cutting">Sheet Cutting</a></li>
+          <li class="nav-item"><a class="nav-link" href="/production/fabrication">Fabrication</a></li>
+          <li class="nav-item"><a class="nav-link" href="/production/dispatch">Dispatch</a></li>
+
+          <li class="nav-item mt-3"><strong>Register</strong></li>
+          <li class="nav-item"><a class="nav-link" href="/register/employee">Employee Register</a></li>
+          <li class="nav-item"><a class="nav-link" href="/register/vendor">Vendor Register</a></li>
+
+          <li class="nav-item mt-3"><strong>Reports</strong></li>
+          <li class="nav-item"><a class="nav-link" href="/reports/daily">Daily</a></li>
+          <li class="nav-item"><a class="nav-link" href="/reports/weekly">Weekly</a></li>
+          <li class="nav-item"><a class="nav-link" href="/reports/monthly">Monthly</a></li>
+        </ul>
+      </div>
+
+      <!-- Main content -->
+      <div class="col-md-9 content">
+        {% block content %}{% endblock %}
+      </div>
+    </div>
+  </div>
+</body>
+</html>
