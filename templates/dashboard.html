@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Dashboard</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      height: 100vh;
+      background: #f0f2f5;
+    }
+
+    .sidebar {
+      width: 250px;
+      background: #343a40;
+      color: #fff;
+      padding-top: 20px;
+      flex-shrink: 0;
+    }
+
+    .sidebar h2 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .sidebar ul {
+      list-style: none;
+      padding-left: 0;
+    }
+
+    .sidebar li {
+      padding: 12px 20px;
+      cursor: pointer;
+      border-bottom: 1px solid #495057;
+    }
+
+    .sidebar li:hover {
+      background-color: #495057;
+    }
+
+    .submenu {
+      background-color: #495057;
+      display: none;
+    }
+
+    .submenu li {
+      padding-left: 40px;
+      font-size: 14px;
+    }
+
+    .main-content {
+      flex: 1;
+      padding: 30px;
+    }
+
+    .main-content h1 {
+      color: #333;
+    }
+
+    .toggle::after {
+      content: ' ▼';
+      float: right;
+    }
+  </style>
+  <script>
+    function toggleSubmenu(id) {
+      var el = document.getElementById(id);
+      el.style.display = el.style.display === 'block' ? 'none' : 'block';
+    }
+  </script>
+</head>
+<body>
+
+  <div class="sidebar">
+    <h2>Ducting App</h2>
+    <ul>
+      <li class="toggle" onclick="toggleSubmenu('enquiry')">Enquiry</li>
+      <ul id="enquiry" class="submenu">
+        <li onclick="location.href='/new_project'">New Project</li>
+      </ul>
+
+      <li class="toggle" onclick="toggleSubmenu('progress')">Progress</li>
+      <ul id="progress" class="submenu">
+        <li onclick="location.href='/progress/preparation'">Preparation</li>
+        <li onclick="location.href='/progress/sheet-cutting'">Sheet Cutting</li>
+        <li onclick="location.href='/progress/fabrication'">Fabrication</li>
+        <li onclick="location.href='/progress/dispatch'">Dispatch</li>
+      </ul>
+
+      <li class="toggle" onclick="toggleSubmenu('summary')">Summary</li>
+      <ul id="summary" class="submenu">
+        <li onclick="location.href='/summary/day-wise'">Day Wise</li>
+        <li onclick="location.href='/summary/weekly'">Weekly Wise</li>
+        <li onclick="location.href='/summary/monthly'">Monthly Wise</li>
+      </ul>
+
+      <li class="toggle" onclick="toggleSubmenu('register')">Register</li>
+      <ul id="register" class="submenu">
+        <li onclick="location.href='/register/vendor'">Vendor Registration</li>
+        <li onclick="location.href='/register/employee'">Employee Registration</li>
+      </ul>
+    </ul>
+  </div>
+
+  <div class="main-content">
+    <h1>Welcome to the Ducting Dashboard</h1>
+    <p>Select an option from the sidebar to get started.</p>
+  </div>
+
+</body>
+</html>
