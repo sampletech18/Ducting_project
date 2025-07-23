@@ -37,8 +37,6 @@ class Project(db.Model):
 
 class MeasurementEntry(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    project_id = db.Column(db.Integer, db.ForeignKey('project.id'), nullable=False)
-
     duct_no = db.Column(db.String(50))
     type = db.Column(db.String(50))
     w1 = db.Column(db.Float)
@@ -49,9 +47,8 @@ class MeasurementEntry(db.Model):
     length = db.Column(db.String(50))
     qty = db.Column(db.Integer)
     factor = db.Column(db.String(20))
+    project_id = db.Column(db.Integer, db.ForeignKey('project.id'))  # <-- Add this line
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
-
-    project = db.relationship('Project', backref=db.backref('measurements', lazy=True))
 
 # ========== USERS (Dummy) ==========
 
