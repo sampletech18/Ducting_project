@@ -1,14 +1,12 @@
-from flask import Flask
+from flask import Flask, request, jsonify, redirect, url_for
+from flask_login import LoginManager
 from .models import db
 import os
 
 def create_app():
     app = Flask(__name__)
 
-    # ✅ Get DB URL from environment or fallback to local SQLite
     db_url = os.environ.get('DATABASE_URL', 'sqlite:///ducting.db')
-
-    # ✅ Convert postgres:// to postgresql:// if needed (Render uses old format)
     if db_url.startswith("postgres://"):
         db_url = db_url.replace("postgres://", "postgresql://", 1)
 
@@ -17,6 +15,18 @@ def create_app():
     app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'your_secret_key')
 
     db.init_app(app)
+
+    # ✅ Setup LoginManager
+    login_manager = LoginManager()
+    login_manager.login_view = 'auth.login'
+    login_manager.init_app(app)
+
+    # ✅ Fix: Return JSON for unauthorized AJAX
+    @login_manager.unauthorized_handler
+    def unauthorized():
+        if request.accept_mimetypes.accept_json and not request.accept_mimetypes.accept_html:
+            return jsonify({'success': False, 'message': 'Unauthorized'}), 401
+        return redirect(url_for('auth.login'))
 
     with app.app_context():
         db.create_all()
