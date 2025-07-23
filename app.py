@@ -119,10 +119,11 @@ def vendor_register():
 
 @app.route('/init_db')
 def init_db():
-    db.create_all()
+    try:
+        db.drop_all()  # 🔥 CAREFUL: Deletes all tables!
+        db.create_all()  # Create tables fresh
 
-    # Check if vendors already exist
-    if Vendor.query.first() is None:
+        # Add sample vendors
         sample_vendors = [
             Vendor(name="Perfect Fabricators", gst="29ABCDE1234F1Z5", address="Chennai, TN"),
             Vendor(name="Duct Tech Engineers", gst="29FGHIJ5678K9Z5", address="Coimbatore, TN"),
@@ -131,8 +132,9 @@ def init_db():
         db.session.add_all(sample_vendors)
         db.session.commit()
 
-    return "Database initialized with sample vendors!"
-
+        return "✅ Database reset & vendors added successfully!"
+    except Exception as e:
+        return f"❌ Failed: {str(e)}"
 # ========== Run ==========
 if __name__ == '__main__':
     with app.app_context():
