@@ -119,6 +119,66 @@
         </thead>
         <tbody id="live-entries">
           <!-- JS will append entries here -->
+
+          <script>
+  const form = document.getElementById("duct-form");
+  const tableBody = document.getElementById("live-entries");
+
+  form.addEventListener("submit", function (e) {
+    e.preventDefault();
+
+    const formData = new FormData(form);
+    const entry = {};
+    formData.forEach((value, key) => {
+      entry[key] = value || '';
+    });
+
+    // Placeholder values for later-calculated fields
+    entry.area = "";
+    entry["24g"] = "";
+    entry["22g"] = "";
+    entry["20g"] = "";
+    entry["18g"] = "";
+    entry["nuts"] = "";
+    entry["cleat"] = "";
+    entry["gasket"] = "";
+    entry["corner"] = "";
+
+    const row = document.createElement("tr");
+    row.innerHTML = `
+      <td contenteditable="true">${entry.duct_no}</td>
+      <td contenteditable="true">${entry.type}</td>
+      <td contenteditable="true">${entry.w1}</td>
+      <td contenteditable="true">${entry.h1}</td>
+      <td contenteditable="true">${entry.w2}</td>
+      <td contenteditable="true">${entry.h2}</td>
+      <td contenteditable="true">${entry.degree}</td>
+      <td contenteditable="true">${entry.length}</td>
+      <td contenteditable="true">${entry.quantity}</td>
+      <td contenteditable="true">${entry.area}</td>
+      <td contenteditable="true">${entry["24g"]}</td>
+      <td contenteditable="true">${entry["22g"]}</td>
+      <td contenteditable="true">${entry["20g"]}</td>
+      <td contenteditable="true">${entry["18g"]}</td>
+      <td contenteditable="true">${entry.nuts}</td>
+      <td contenteditable="true">${entry.cleat}</td>
+      <td contenteditable="true">${entry.gasket}</td>
+      <td contenteditable="true">${entry.corner}</td>
+      <td>
+        <button class="btn btn-sm btn-danger btn-delete">Delete</button>
+      </td>
+    `;
+
+    row.querySelector(".btn-delete").addEventListener("click", function () {
+      if (confirm("Are you sure you want to delete this entry?")) {
+        row.remove();
+      }
+    });
+
+    tableBody.appendChild(row);
+    form.reset();
+  });
+          </script>
         </tbody>
       </table>
     </div>
