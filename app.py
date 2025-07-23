@@ -37,6 +37,8 @@ class Project(db.Model):
 
 class MeasurementEntry(db.Model):
     id = db.Column(db.Integer, primary_key=True)
+    project_id = db.Column(db.Integer, db.ForeignKey('project.id'), nullable=False)
+
     duct_no = db.Column(db.String(50))
     type = db.Column(db.String(50))
     w1 = db.Column(db.Float)
@@ -48,6 +50,8 @@ class MeasurementEntry(db.Model):
     qty = db.Column(db.Integer)
     factor = db.Column(db.String(20))
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    project = db.relationship('Project', backref=db.backref('measurements', lazy=True))
 
 # ========== USERS (Dummy) ==========
 
@@ -139,32 +143,25 @@ def add_measurement():
         return redirect(url_for('login'))
 
     try:
-        duct_no = request.form['duct_no']
-        duct_type = request.form['duct_type']
-        w1 = float(request.form['w1'])
-        h1 = float(request.form['h1'])
-        w2 = float(request.form['w2'])
-        h2 = float(request.form['h2'])
-        offset = request.form['degree_offset']
-        length = request.form['length_radius']
-        qty = int(request.form['quantity'])
-        factor = request.form.get('factor', '1')
+        project_id = int(request.form['project_id'])  # 👈 get project_id
 
         new_entry = MeasurementEntry(
-            duct_no=duct_no,
-            type=duct_type,
-            w1=w1,
-            h1=h1,
-            w2=w2,
-            h2=h2,
-            offset=offset,
-            length=length,
-            qty=qty,
-            factor=factor
+            project_id=project_id,  # 👈 store project_id
+            duct_no=request.form['duct_no'],
+            type=request.form['duct_type'],
+            w1=float(request.form['w1']),
+            h1=float(request.form['h1']),
+            w2=float(request.form['w2']),
+            h2=float(request.form['h2']),
+            offset=request.form['degree_offset'],
+            length=request.form['length_radius'],
+            qty=int(request.form['quantity']),
+            factor=request.form.get('factor', '1')
         )
+
         db.session.add(new_entry)
         db.session.commit()
-        return redirect(url_for('measurement_sheet'))
+        return redirect(url_for('measurement_sheet', project_id=project_id))
     except Exception as e:
         return f"Error: {str(e)}"
 
