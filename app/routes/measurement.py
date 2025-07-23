@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, request, redirect, url_for, jsonify
 from flask_login import login_required, current_user
 from app.models import db
-from app.models import MeasurementEntry, Project
+from app.models import Measurement, Project
 import math
 
 measurement_bp = Blueprint('measurement', __name__, url_prefix='/measurement')
