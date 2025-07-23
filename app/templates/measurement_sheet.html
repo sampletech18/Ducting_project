@@ -1,193 +1,186 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Measurement Sheet</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
   <style>
+    body {
+      background-color: #f0f2f5;
+    }
     .form-section {
-      background: #f8f9fa;
+      background: #ffffff;
       border-radius: 10px;
       padding: 20px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
     }
     .table-section {
-      margin-top: 20px;
+      overflow-x: auto;
     }
-    .totals-row td {
-      font-weight: bold;
-      background-color: #d9edf7;
+    .form-label {
+      font-weight: 500;
     }
   </style>
 </head>
 <body>
-<div class="container-fluid mt-4">
-  <div class="row">
-    <!-- Left Section -->
-    <div class="col-md-4">
-      <div class="form-section">
-        <h5>Upload Drawings</h5>
-        <div class="mb-3">
-          <label>Source Tag Drawing</label>
-          <input type="file" class="form-control">
-        </div>
-        <div class="mb-3">
-          <label>Revision</label>
-          <input type="file" class="form-control">
-        </div>
-        <div class="mb-3">
-          <label>AutoCAD Viewer (Placeholder)</label>
-          <div class="border p-2 text-center text-muted">AutoCAD Viewer Here</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Right Section -->
-    <div class="col-md-8">
-      <div class="form-section">
-        <h5>Add Duct Entry</h5>
-        <div class="row g-2">
-          <div class="col"><input type="text" class="form-control" placeholder="Duct No" id="duct_no"></div>
-          <div class="col">
-            <select class="form-select" id="duct_type">
-              <option value="">Type</option>
-              <option value="st">ST</option>
-              <option value="elb">ELB</option>
-              <option value="red">RED</option>
-              <option value="dm">DM</option>
-              <option value="offset">OFFSET</option>
-              <option value="shoe">SHOE</option>
-              <option value="vanes">VANES</option>
-            </select>
+  <div class="container-fluid mt-4">
+    <div class="row">
+      <!-- Left: Diagram Upload -->
+      <div class="col-md-4">
+        <div class="form-section">
+          <h5>Upload Source Drawing</h5>
+          <div class="mb-3">
+            <label class="form-label">Source Tag Drawing</label>
+            <input type="file" class="form-control" />
           </div>
-          <div class="col"><input type="number" class="form-control" placeholder="W1" id="w1"></div>
-          <div class="col"><input type="number" class="form-control" placeholder="H1" id="h1"></div>
-          <div class="col"><input type="number" class="form-control" placeholder="W2" id="w2"></div>
-          <div class="col"><input type="number" class="form-control" placeholder="H2" id="h2"></div>
-        </div>
-        <div class="row g-2 mt-2">
-          <div class="col"><input type="number" class="form-control" placeholder="Length/Radius" id="length"></div>
-          <div class="col"><input type="number" class="form-control" placeholder="Degree/Offset" id="degree"></div>
-          <div class="col"><input type="number" class="form-control" placeholder="Qty" id="quantity"></div>
-          <div class="col"><input type="number" step="0.01" class="form-control" placeholder="Factor (optional)" id="factor"></div>
-        <button id="add-entry-btn" class="btn btn-primary">Add Entry</button>
+          <div class="mb-3">
+            <label class="form-label">Revision</label>
+            <input type="file" class="form-control" />
+          </div>
+          <div class="mt-3">
+            <div class="border rounded p-3 text-center" style="height: 200px; background-color: #e9ecef;">
+              AutoCAD Viewer Placeholder
+            </div>
+          </div>
         </div>
       </div>
 
-      <!-- Table -->
-      <div class="table-section">
-        <table class="table table-bordered table-striped" id="measurementTable">
-          <thead class="table-light">
-          <tr>
-            <th>Duct No</th><th>W1</th><th>H1</th><th>W2</th><th>H2</th><th>Length</th>
-            <th>Qty</th><th>Deg/Offset</th><th>Gauge</th><th>Area</th>
-            <th>24g</th><th>22g</th><th>20g</th><th>18g</th>
-            <th>Gasket</th><th>Cleat</th><th>Nuts & Bolts</th><th>Corner</th>
-            <th>Actions</th>
-          </tr>
-          </thead>
-          <tbody id="tableBody"></tbody>
-          <tfoot>
-          <tr class="totals-row">
-            <td colspan="9">Total</td>
-            <td id="totalArea">0</td>
-            <td id="total24g">0</td>
-            <td id="total22g">0</td>
-            <td id="total20g">0</td>
-            <td id="total18g">0</td>
-            <td id="totalGasket">0</td>
-            <td id="totalCleat">0</td>
-            <td id="totalNuts">0</td>
-            <td id="totalCorner">0</td>
-            <td></td>
-          </tr>
-          </tfoot>
-        </table>
-        <div class="mt-3">
+      <!-- Right: Duct Entry Form and Table -->
+      <div class="col-md-8">
+        <div class="form-section">
+          <h5 class="mb-3">Duct Entry</h5>
+
+          <div class="row g-2">
+            <div class="col"><input type="text" class="form-control" placeholder="Duct No" id="duct_no"></div>
+            <div class="col">
+              <select class="form-select" id="duct_type">
+                <option value="">Select Type</option>
+                <option value="ST">ST</option>
+                <option value="ELB">ELB</option>
+                <option value="RED">RED</option>
+                <option value="DM">DM</option>
+                <option value="OFFSET">OFFSET</option>
+                <option value="SHOE">SHOE</option>
+                <option value="VANES">VANES</option>
+              </select>
+            </div>
+            <div class="col"><input type="number" class="form-control" placeholder="W1" id="w1"></div>
+            <div class="col"><input type="number" class="form-control" placeholder="H1" id="h1"></div>
+          </div>
+
+          <div class="row g-2 mt-2">
+            <div class="col"><input type="number" class="form-control" placeholder="W2" id="w2"></div>
+            <div class="col"><input type="number" class="form-control" placeholder="H2" id="h2"></div>
+            <div class="col"><input type="number" class="form-control" placeholder="Length/Radius" id="length"></div>
+            <div class="col"><input type="text" class="form-control" placeholder="Degree/Offset" id="degree"></div>
+          </div>
+
+          <div class="row g-2 mt-2">
+            <div class="col"><input type="number" class="form-control" placeholder="Qty" id="quantity"></div>
+            <div class="col"><input type="number" step="0.01" class="form-control" placeholder="Factor (optional)" id="factor"></div>
+            <div class="col d-grid">
+              <button id="add-entry-btn" class="btn btn-primary">Add Entry</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Live Table -->
+        <div class="form-section mt-4">
+          <h5 class="mb-3">Measurement Table</h5>
+          <div class="table-section">
+            <table class="table table-bordered table-striped table-sm" id="entry-table">
+              <thead class="table-light">
+                <tr>
+                  <th>Duct No</th>
+                  <th>W1</th>
+                  <th>H1</th>
+                  <th>W2</th>
+                  <th>H2</th>
+                  <th>Length</th>
+                  <th>Qty</th>
+                  <th>Degree/Offset</th>
+                  <th>Gauge</th>
+                  <th>Area</th>
+                  <th>24g</th>
+                  <th>22g</th>
+                  <th>20g</th>
+                  <th>18g</th>
+                  <th>Cleat</th>
+                  <th>Bolts</th>
+                  <th>Gasket</th>
+                  <th>Corner</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="entry-table-body">
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Bottom Buttons -->
+        <div class="form-section mt-3 text-end">
           <button class="btn btn-success">Submit</button>
-          <button class="btn btn-secondary">Export to Excel</button>
-          <button class="btn btn-danger">Export to PDF</button>
-          <button class="btn btn-info">Print</button>
+          <button class="btn btn-outline-secondary">Export PDF</button>
+          <button class="btn btn-outline-secondary">Export Excel</button>
+          <button class="btn btn-outline-secondary">Print</button>
         </div>
       </div>
     </div>
   </div>
-</div>
 
-<script>
-  const totals = {
-    area: 0, g24: 0, g22: 0, g20: 0, g18: 0,
-    gasket: 0, cleat: 0, corner: 0, nuts_bolts: 0
-  };
+  <!-- Script -->
+  <script>
+    function addEntry() {
+      const duct_no = document.getElementById("duct_no").value;
+      const duct_type = document.getElementById("duct_type").value;
+      const w1 = document.getElementById("w1").value;
+      const h1 = document.getElementById("h1").value;
+      const w2 = document.getElementById("w2").value;
+      const h2 = document.getElementById("h2").value;
+      const length = document.getElementById("length").value;
+      const degree = document.getElementById("degree").value;
+      const quantity = document.getElementById("quantity").value;
+      const factor = document.getElementById("factor").value;
 
-  function updateTotals(row) {
-    totals.area += row.area;
-    totals.g24 += row.g24;
-    totals.g22 += row.g22;
-    totals.g20 += row.g20;
-    totals.g18 += row.g18;
-    totals.gasket += row.gasket;
-    totals.cleat += row.cleat;
-    totals.corner += row.corner;
-    totals.nuts_bolts += row.nuts_bolts;
+      // Basic validation
+      if (!duct_no || !duct_type || !w1 || !h1 || !quantity || !length) {
+        alert("Please fill required fields");
+        return;
+      }
 
-    document.getElementById("totalArea").innerText = totals.area.toFixed(3);
-    document.getElementById("total24g").innerText = totals.g24.toFixed(3);
-    document.getElementById("total22g").innerText = totals.g22.toFixed(3);
-    document.getElementById("total20g").innerText = totals.g20.toFixed(3);
-    document.getElementById("total18g").innerText = totals.g18.toFixed(3);
-    document.getElementById("totalGasket").innerText = totals.gasket.toFixed(3);
-    document.getElementById("totalCleat").innerText = totals.cleat.toFixed(3);
-    document.getElementById("totalNuts").innerText = totals.nuts_bolts;
-    document.getElementById("totalCorner").innerText = totals.corner;
-  }
-
-  function addEntry() {
-    const data = {
-      duct_no: document.getElementById("duct_no").value,
-      duct_type: document.getElementById("duct_type").value,
-      w1: document.getElementById("w1").value,
-      h1: document.getElementById("h1").value,
-      w2: document.getElementById("w2").value,
-      h2: document.getElementById("h2").value,
-      length: document.getElementById("length").value,
-      degree: document.getElementById("degree").value,
-      quantity: document.getElementById("quantity").value,
-      factor: document.getElementById("factor").value
-    };
-
-    fetch("/calculate_measurement", {
-      method: "POST",
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify(data)
-    })
-    .then(res => res.json())
-    .then(res => {
-      const row = document.createElement("tr");
-      row.innerHTML = `
-        <td>${data.duct_no}</td>
-        <td>${data.w1}</td>
-        <td>${data.h1}</td>
-        <td>${data.w2}</td>
-        <td>${data.h2}</td>
-        <td>${data.length}</td>
-        <td>${data.quantity}</td>
-        <td>${data.degree}</td>
-        <td>${res.gauge}</td>
-        <td>${res.area}</td>
-        <td>${res.g24}</td>
-        <td>${res.g22}</td>
-        <td>${res.g20}</td>
-        <td>${res.g18}</td>
-        <td>${res.gasket}</td>
-        <td>${res.cleat}</td>
-        <td>${res.nuts_bolts}</td>
-        <td>${res.corner}</td>
-        <td><button class="btn btn-sm btn-danger">Delete</button></td>
+      const row = `
+        <tr>
+          <td>${duct_no}</td>
+          <td>${w1}</td>
+          <td>${h1}</td>
+          <td>${w2}</td>
+          <td>${h2}</td>
+          <td>${length}</td>
+          <td>${quantity}</td>
+          <td>${degree}</td>
+          <td>-</td>
+          <td>-</td>
+          <td>0</td>
+          <td>0</td>
+          <td>0</td>
+          <td>0</td>
+          <td>0</td>
+          <td>0</td>
+          <td>0</td>
+          <td>0</td>
+          <td>
+            <button class="btn btn-sm btn-warning">Edit</button>
+            <button class="btn btn-sm btn-danger">Delete</button>
+          </td>
+        </tr>
       `;
-      document.getElementById("tableBody").appendChild(row);
-      updateTotals(res);
+      document.getElementById("entry-table-body").insertAdjacentHTML("beforeend", row);
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      document.getElementById("add-entry-btn").addEventListener("click", addEntry);
     });
-  }
-</script>
+  </script>
 </body>
 </html>
