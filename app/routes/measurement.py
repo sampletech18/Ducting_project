@@ -178,3 +178,11 @@ def delete_measurement(id):
         db.session.commit()
         return jsonify({'message': 'Deleted successfully'})
     return jsonify({'message': 'Entry not found'}), 404
+
+
+
+@measurement_bp.route('/export_pdf/<int:project_id>', methods=['GET'])
+def export_pdf(project_id):
+    # Later replace this with actual PDF generation
+    return f"PDF export logic for project {project_id}"
+
