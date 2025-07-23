@@ -1,9 +1,38 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, render_template, redirect, url_for, flash
 from app.models import db, Measurement
 from math import pi
+from werkzeug.utils import secure_filename
+import os
 
 measurement_bp = Blueprint('measurement', __name__)
+UPLOAD_FOLDER = 'uploads/'  # Make sure this directory exists
 
+# ------------------------------------
+# Upload Files for Source and Revision
+# ------------------------------------
+@measurement_bp.route('/upload_files/<int:project_id>', methods=['POST'])
+def upload_files(project_id):
+    source_file = request.files.get('source_file')
+    revision_file = request.files.get('revision_file')
+
+    if not os.path.exists(UPLOAD_FOLDER):
+        os.makedirs(UPLOAD_FOLDER)
+
+    if source_file:
+        filename = secure_filename(f"{project_id}_source_{source_file.filename}")
+        source_file.save(os.path.join(UPLOAD_FOLDER, filename))
+
+    if revision_file:
+        filename = secure_filename(f"{project_id}_revision_{revision_file.filename}")
+        revision_file.save(os.path.join(UPLOAD_FOLDER, filename))
+
+    flash("Files uploaded successfully", "success")
+    return redirect(url_for('project.measurement_sheet', project_id=project_id))
+
+
+# ------------------------------------
+# Measurement Calculation Logic
+# ------------------------------------
 def calculate_measurement(data):
     w1 = int(data.get('w1', 0))
     h1 = int(data.get('h1', 0))
@@ -15,9 +44,6 @@ def calculate_measurement(data):
     factor = float(data.get('factor') or 1)
     duct_type = data.get('duct_type')
 
-    # ----------------------------
-    # Gauge Logic
-    # ----------------------------
     max_side = max(w1, h1)
     if max_side <= 750:
         gauge = '24g'
@@ -28,9 +54,6 @@ def calculate_measurement(data):
     else:
         gauge = '18g'
 
-    # ----------------------------
-    # Area Calculation (m²)
-    # ----------------------------
     area = 0
     if duct_type == 'st':
         area = 2 * (w1 + h1) / 1000 * (length / 1000) * qty
@@ -49,17 +72,11 @@ def calculate_measurement(data):
 
     area = round(area, 3)
 
-    # ----------------------------
-    # Area Distribution by Gauge
-    # ----------------------------
     g24 = area if gauge == '24g' else 0
     g22 = area if gauge == '22g' else 0
     g20 = area if gauge == '20g' else 0
     g18 = area if gauge == '18g' else 0
 
-    # ----------------------------
-    # Material Calculation
-    # ----------------------------
     cleat = int(area * 3)
     nuts_bolts = int(area * 2)
     gasket = round(area * 0.5, 2)
@@ -77,6 +94,7 @@ def calculate_measurement(data):
         'gasket': gasket,
         'corner': corner
     }
+
 
 # ------------------------------------
 # Create New Measurement Entry
@@ -112,29 +130,8 @@ def create_measurement():
     db.session.add(entry)
     db.session.commit()
 
-    return jsonify({
-    'success': True,
-    'entry': {
-        'duct_no': entry.duct_no,
-        'duct_type': entry.duct_type,
-        'w1': entry.w1,
-        'h1': entry.h1,
-        'w2': entry.w2,
-        'h2': entry.h2,
-        'length': entry.length,
-        'degree': entry.degree,
-        'quantity': entry.quantity,
-        'gauge': entry.gauge,
-        'g24': entry.g24,
-        'g22': entry.g22,
-        'g20': entry.g20,
-        'g18': entry.g18,
-        'cleat': entry.cleat,
-        'nuts_bolts': entry.nuts_bolts,
-        'gasket': entry.gasket,
-        'corner': entry.corner
-    }
-}), 201
+    return jsonify({'message': 'Measurement added successfully'}), 201
+
 
 # ------------------------------------
 # Get All Entries
@@ -168,6 +165,7 @@ def get_all_measurements():
             'corner': m.corner
         })
     return jsonify(result)
+
 
 # ------------------------------------
 # Delete Entry
