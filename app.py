@@ -20,20 +20,20 @@ class Vendor(db.Model):
     gst = db.Column(db.String(50))
     address = db.Column(db.String(250))
 
-class Project(db.Model):
+class MeasurementEntry(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    enquiry_id = db.Column(db.String(50), unique=True)
-    quotation = db.Column(db.String(50))
-    start_date = db.Column(db.Date)
-    end_date = db.Column(db.Date)
-    location = db.Column(db.String(150))
-    vendor_id = db.Column(db.Integer, db.ForeignKey('vendor.id'))
-    incharge = db.Column(db.String(100))
-    contact = db.Column(db.String(20))
-    email = db.Column(db.String(100))
-    notes = db.Column(db.Text)
-
-    vendor = db.relationship('Vendor', backref='projects')
+    duct_no = db.Column(db.String(50))
+    type = db.Column(db.String(50))
+    w1 = db.Column(db.Float)
+    h1 = db.Column(db.Float)
+    w2 = db.Column(db.Float)
+    h2 = db.Column(db.Float)
+    offset = db.Column(db.String(50))
+    length = db.Column(db.String(50))
+    qty = db.Column(db.Integer)
+    factor = db.Column(db.String(20))
+    project_id = db.Column(db.Integer, db.ForeignKey('project.id'))  # ← Important!
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
 class MeasurementEntry(db.Model):
     id = db.Column(db.Integer, primary_key=True)
