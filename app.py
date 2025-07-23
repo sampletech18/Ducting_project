@@ -169,11 +169,14 @@ def add_measurement():
         return f"Error: {str(e)}"
 
 
-@app.route('/measurement_sheet')
-def measurement_sheet():
+@app.route('/measurement_sheet/<int:project_id>')
+def measurement_sheet(project_id):
     if 'username' not in session:
         return redirect(url_for('login'))
-    return render_template('measurement_sheet.html')
+
+    project = Project.query.get_or_404(project_id)
+    entries = MeasurementEntry.query.filter_by(project_id=project_id).all()
+    return render_template('measurement_sheet.html', project=project, entries=entries)
 
 
 @app.route('/submit_measurements', methods=['POST'])
