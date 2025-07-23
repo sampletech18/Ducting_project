@@ -4,99 +4,60 @@
   <meta charset="UTF-8">
   <title>Measurement Sheet</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-  <style>
-    .form-section {
-      background: #f8f9fa;
-      padding: 20px;
-      border-radius: 10px;
-      margin-bottom: 20px;
-    }
-    .table-section {
-      overflow-x: auto;
-    }
-    .gauge-column {
-      background: #e9ecef;
-    }
-    .autocad-box {
-      background: #fff;
-      border: 1px solid #ccc;
-      height: 300px;
-      border-radius: 10px;
-    }
-  </style>
 </head>
 <body>
 <div class="container-fluid mt-4">
   <div class="row">
-    <!-- Left Section -->
+    <!-- Left -->
     <div class="col-md-4">
-      <div class="form-section">
+      <div class="bg-light p-3 rounded">
         <h5>Upload Drawings</h5>
         <form action="/measurement/upload-files/{{ project.id }}" method="POST" enctype="multipart/form-data">
-          <div class="mb-3">
-            <label class="form-label">Source Tag Drawing</label>
-            <input type="file" name="source_file" class="form-control" required>
-          </div>
-          <div class="mb-3">
-            <label class="form-label">Revision File</label>
-            <input type="file" name="revision_file" class="form-control">
-          </div>
-          <button type="submit" class="btn btn-primary">Upload</button>
+          <input type="file" name="source_file" class="form-control mb-2" required>
+          <input type="file" name="revision_file" class="form-control mb-2">
+          <button class="btn btn-primary w-100">Upload</button>
         </form>
-
-        <div class="mt-4">
-          <h6>AutoCAD Viewer</h6>
-          <div class="autocad-box d-flex align-items-center justify-content-center">
-            <span>AutoCAD Diagram Preview</span>
-          </div>
-        </div>
+        <hr>
+        <h6>AutoCAD Preview</h6>
+        <div class="border rounded text-center py-5">[ AutoCAD Preview ]</div>
       </div>
     </div>
 
-    <!-- Right Section -->
+    <!-- Right -->
     <div class="col-md-8">
-      <div class="form-section">
-        <h5>Add Duct Entry</h5>
-        <form id="ductForm">
-          <div class="row g-2">
-            <div class="col-md-3"><input type="text" name="duct_no" class="form-control" placeholder="Duct No" required></div>
-            <div class="col-md-3">
-              <select name="duct_type" class="form-select" required>
-                <option value="">Type</option>
-                <option value="st">ST</option>
-                <option value="elb">ELB</option>
-                <option value="red">RED</option>
-                <option value="dm">DM</option>
-                <option value="offset">OFFSET</option>
-                <option value="shoe">SHOE</option>
-                <option value="vanes">VANES</option>
-              </select>
-            </div>
-            <div class="col-md-2"><input type="number" name="w1" class="form-control" placeholder="W1"></div>
-            <div class="col-md-2"><input type="number" name="h1" class="form-control" placeholder="H1"></div>
-            <div class="col-md-2"><input type="number" name="w2" class="form-control" placeholder="W2"></div>
-            <div class="col-md-2"><input type="number" name="h2" class="form-control" placeholder="H2"></div>
-            <input type="number" name="length_radius" class="form-control" placeholder="Length">
-            <div class="col-md-2"><input type="number" name="degree_offset" class="form-control" placeholder="Deg/Offset"></div>
-            <div class="col-md-2"><input type="number" name="quantity" class="form-control" placeholder="Qty" required></div>
-            <div class="col-md-2"><input type="number" name="factor" class="form-control" placeholder="Factor"></div>
-            <div class="col-md-2"><button type="button" onclick="addEntry()" class="btn btn-success w-100">Add Entry</button></div>
+      <div class="bg-light p-3 rounded mb-3">
+        <h5>Add Entry</h5>
+        <form id="ductForm" class="row g-2">
+          <div class="col-md-2"><input name="duct_no" class="form-control" placeholder="Duct No" required></div>
+          <div class="col-md-2">
+            <select name="duct_type" class="form-select" required>
+              <option value="">Type</option><option value="st">ST</option><option value="elb">ELB</option>
+              <option value="red">RED</option><option value="dm">DM</option><option value="offset">OFFSET</option>
+              <option value="shoe">SHOE</option><option value="vanes">VANES</option>
+            </select>
+          </div>
+          <div class="col-md-2"><input name="w1" type="number" class="form-control" placeholder="W1"></div>
+          <div class="col-md-2"><input name="h1" type="number" class="form-control" placeholder="H1"></div>
+          <div class="col-md-2"><input name="w2" type="number" class="form-control" placeholder="W2"></div>
+          <div class="col-md-2"><input name="h2" type="number" class="form-control" placeholder="H2"></div>
+          <div class="col-md-2"><input name="length" type="number" class="form-control" placeholder="Length"></div>
+          <div class="col-md-2"><input name="degree_offset" type="number" class="form-control" placeholder="Offset"></div>
+          <div class="col-md-2"><input name="quantity" type="number" class="form-control" placeholder="Qty" required></div>
+          <div class="col-md-2"><input name="factor" type="number" class="form-control" placeholder="Factor"></div>
+          <div class="col-md-2">
+            <button type="button" class="btn btn-success w-100" onclick="addEntry()">Add</button>
           </div>
         </form>
       </div>
 
-      <!-- Live Table Section -->
-      <div class="table-section">
-        <h5>Measurement Entries</h5>
-        <table class="table table-bordered table-striped table-hover">
+      <!-- Table -->
+      <div class="table-responsive">
+        <table class="table table-bordered table-hover">
           <thead class="table-dark">
             <tr>
-              <th>Duct No</th><th>Type</th><th>W1</th><th>H1</th><th>W2</th><th>H2</th>
-              <th>Length</th><th>Deg/Offset</th><th>Qty</th><th>Gauge</th>
-              <th class="gauge-column">24g</th>
-              <th class="gauge-column">22g</th>
-              <th class="gauge-column">20g</th>
-              <th class="gauge-column">18g</th>
+              <th>Duct No</th><th>Type</th><th>W1</th><th>H1</th><th>W2</th><th>H2</th><th>Length</th>
+              <th>Offset</th><th>Qty</th><th>Gauge</th>
+              <th>24g</th><th>22g</th><th>20g</th><th>18g</th>
               <th>Cleat</th><th>Bolts</th><th>Gasket</th><th>Corner</th><th>Action</th>
             </tr>
           </thead>
@@ -107,10 +68,10 @@
               <td>{{ entry.duct_type.upper() }}</td>
               <td>{{ entry.w1 }}</td>
               <td>{{ entry.h1 }}</td>
-              <td>{{ entry.w2 or '-' }}</td>
-              <td>{{ entry.h2 or '-' }}</td>
-              <td>{{ entry.length or '-' }}</td>
-              <td>{{ entry.degree_offset or '-' }}</td>
+              <td>{{ entry.w2 }}</td>
+              <td>{{ entry.h2 }}</td>
+              <td>{{ entry.length }}</td>
+              <td>{{ entry.degree_offset }}</td>
               <td>{{ entry.quantity }}</td>
               <td>{{ entry.gauge }}</td>
               <td>{% if entry.gauge == '24g' %}{{ entry.area }}{% endif %}</td>
@@ -131,12 +92,11 @@
         </table>
       </div>
 
-      <!-- Action Buttons -->
       <div class="mt-3">
         <a href="/measurement/submit/{{ project.id }}" class="btn btn-success">Submit</a>
         <a href="/measurement/export/pdf/{{ project.id }}" class="btn btn-secondary">Export PDF</a>
         <a href="/measurement/export/excel/{{ project.id }}" class="btn btn-info">Export Excel</a>
-        <button onclick="window.print()" class="btn btn-dark">Print</button>
+        <button class="btn btn-dark" onclick="window.print()">Print</button>
       </div>
     </div>
   </div>
@@ -144,31 +104,27 @@
 
 <script>
 function addEntry() {
-  const form = document.getElementById("ductForm");
+  const form = document.getElementById('ductForm');
   const formData = new FormData(form);
-  const data = {};
-  for (const [key, value] of formData.entries()) {
-    data[key] = value;
-  }
-
+  const jsonData = {};
+  formData.forEach((value, key) => jsonData[key] = value);
   const projectId = "{{ project.id }}";
 
   fetch(`/measurement/add-measurement/${projectId}`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(data)
+    body: JSON.stringify(jsonData)
   })
   .then(res => res.json())
   .then(data => {
     if (data.success) {
-      window.location.reload();
+      location.reload();
     } else {
       alert("Error: " + data.message);
     }
   })
-  .catch(error => {
-    console.error("Error adding entry:", error);
-    alert("Request failed");
+  .catch(err => {
+    alert("Request failed: " + err);
   });
 }
 </script>
