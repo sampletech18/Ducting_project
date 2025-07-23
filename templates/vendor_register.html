@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Vendor Registration</title>
+  <style>
+    body {
+      background: #f4f6f8;
+      font-family: Arial, sans-serif;
+      padding: 30px;
+    }
+
+    .form-container {
+      background: #fff;
+      padding: 30px;
+      max-width: 700px;
+      margin: auto;
+      border-radius: 10px;
+      box-shadow: 0px 0px 15px rgba(0,0,0,0.1);
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    h4 {
+      margin-top: 25px;
+      color: #007bff;
+    }
+
+    input, textarea {
+      width: 100%;
+      padding: 10px;
+      margin: 5px 0 15px 0;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+
+    button {
+      padding: 8px 16px;
+      margin: 5px 0;
+      border: none;
+      background: #007bff;
+      color: white;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #0056b3;
+    }
+
+    .inline {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .alert-success {
+      background-color: #d4edda;
+      color: #155724;
+      padding: 10px;
+      border-radius: 5px;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+  </style>
+  <script>
+    function addRow(sectionId, name) {
+      const container = document.getElementById(sectionId);
+      const div = document.createElement('div');
+      div.classList.add("inline");
+      div.innerHTML = `<input type="text" name="${name}" required>
+                       <button type="button" onclick="this.parentNode.remove()">-</button>`;
+      container.appendChild(div);
+    }
+
+    function showPopup() {
+      alert("Vendor registered successfully!");
+    }
+  </script>
+</head>
+<body {% if success %} onload="showPopup()" {% endif %}>
+  <div class="form-container">
+    <h2>Vendor Registration</h2>
+    {% if success %}
+      <div class="alert-success">Vendor saved successfully!</div>
+    {% endif %}
+    <form method="POST">
+      <h4>Vendor Details</h4>
+      <input type="text" name="company_name" placeholder="Company Name" required>
+      <input type="text" name="gst_number" placeholder="GST Number">
+      <textarea name="address" placeholder="Address"></textarea>
+
+      <h4>Communication Details</h4>
+      <div id="comm-details" class="inline">
+        <input type="text" name="contact_name" placeholder="Contact Person" required>
+        <button type="button" onclick="addRow('comm-details', 'contact_name')">+</button>
+      </div>
+
+      <h4>Bank Account Details</h4>
+      <div id="bank-details" class="inline">
+        <input type="text" name="bank_name" placeholder="Bank Name" required>
+        <button type="button" onclick="addRow('bank-details', 'bank_name')">+</button>
+      </div>
+
+      <button type="submit">Submit Vendor</button>
+    </form>
+  </div>
+</body>
+</html>
