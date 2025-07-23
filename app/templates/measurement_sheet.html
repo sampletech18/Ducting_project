@@ -1,62 +1,64 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Measurement Sheet</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
   <style>
     .form-section {
-      background: #f9f9f9;
-      border-radius: 10px;
+      background: #f1f1f1;
       padding: 20px;
+      border-radius: 10px;
     }
-    .table-section {
-      max-height: 400px;
-      overflow-y: auto;
+    .auto-image {
+      max-width: 100%;
+      max-height: 250px;
+      border: 1px solid #ccc;
+      margin-top: 10px;
     }
-    .form-label {
+    .totals-row {
+      background: #eee;
       font-weight: bold;
     }
   </style>
 </head>
-<body class="container my-4">
-
-  <h2 class="mb-4">Measurement Sheet - Project: {{ project.project_name }}</h2>
-
+<body>
+<div class="container-fluid mt-3">
   <div class="row">
-    <!-- Left Side -->
+    <!-- Left section -->
     <div class="col-md-4">
       <div class="form-section">
+        <h5>Upload Drawings</h5>
         <form action="{{ url_for('measurement.upload_files', project_id=project.id) }}" method="POST" enctype="multipart/form-data">
-          <div class="mb-3">
-            <label class="form-label">Source Tag Drawing</label>
-            <input type="file" class="form-control" name="source_tag">
+          <div class="mb-2">
+            <label class="form-label">Source Tag Drawing:</label>
+            <input type="file" name="source_tag" class="form-control" accept="image/*,.pdf">
           </div>
-          <div class="mb-3">
-            <label class="form-label">Revision Drawing</label>
-            <input type="file" class="form-control" name="revision_file">
+          <div class="mb-2">
+            <label class="form-label">Revision:</label>
+            <input type="file" name="revision" class="form-control" accept="image/*,.pdf">
           </div>
-          <button class="btn btn-primary w-100">Upload</button>
+          <button type="submit" class="btn btn-primary mt-2">Upload</button>
         </form>
-        <hr>
-        <h6>AutoCAD Viewer (Coming Soon)</h6>
-        <div class="border p-3 text-muted text-center">Viewer Placeholder</div>
+        {% if project.source_tag_path %}
+          <img src="{{ url_for('static', filename=project.source_tag_path) }}" class="auto-image" alt="Source Tag">
+        {% endif %}
+        {% if project.revision_path %}
+          <img src="{{ url_for('static', filename=project.revision_path) }}" class="auto-image" alt="Revision">
+        {% endif %}
       </div>
     </div>
 
-    <!-- Right Side -->
+    <!-- Right section -->
     <div class="col-md-8">
       <div class="form-section">
-        <form method="POST" action="{{ url_for('measurement.add_entry', project_id=project.id) }}">
+        <h5>Add Duct Entry</h5>
+        <form id="ductForm">
           <div class="row g-2">
-            <div class="col-md-4">
-              <label class="form-label">Duct No</label>
-              <input type="text" class="form-control" name="duct_no" required>
-            </div>
-            <div class="col-md-4">
-              <label class="form-label">Duct Type</label>
-              <select class="form-select" name="duct_type" required>
-                <option value="">-- Select --</option>
+            <div class="col-md-3"><input type="text" name="duct_no" placeholder="Duct No" class="form-control" required></div>
+            <div class="col-md-3">
+              <select name="duct_type" class="form-select" required>
+                <option value="">Type</option>
                 <option value="st">ST</option>
                 <option value="elb">ELB</option>
                 <option value="red">RED</option>
@@ -66,128 +68,97 @@
                 <option value="vanes">VANES</option>
               </select>
             </div>
-            <div class="col-md-4">
-              <label class="form-label">W1</label>
-              <input type="number" class="form-control" name="width1" required>
-            </div>
-            <div class="col-md-4">
-              <label class="form-label">H1</label>
-              <input type="number" class="form-control" name="height1" required>
-            </div>
-            <div class="col-md-4">
-              <label class="form-label">W2</label>
-              <input type="number" class="form-control" name="width2">
-            </div>
-            <div class="col-md-4">
-              <label class="form-label">H2</label>
-              <input type="number" class="form-control" name="height2">
-            </div>
-            <div class="col-md-4">
-              <label class="form-label">Length / Radius</label>
-              <input type="number" class="form-control" name="length_radius" required>
-            </div>
-            <div class="col-md-4">
-              <label class="form-label">Degree / Offset</label>
-              <input type="number" class="form-control" name="degree_offset">
-            </div>
-            <div class="col-md-4">
-              <label class="form-label">Quantity</label>
-              <input type="number" class="form-control" name="quantity" required>
-            </div>
-            <div class="col-md-4">
-              <label class="form-label">Factor</label>
-              <input type="number" step="0.01" class="form-control" name="factor">
-            </div>
-            <div class="col-md-12 text-end mt-2">
-              <button type="submit" class="btn btn-success">Add Entry</button>
+            <div class="col-md-2"><input type="number" name="w1" placeholder="W1" class="form-control"></div>
+            <div class="col-md-2"><input type="number" name="h1" placeholder="H1" class="form-control"></div>
+            <div class="col-md-2"><input type="number" name="w2" placeholder="W2" class="form-control"></div>
+            <div class="col-md-2"><input type="number" name="h2" placeholder="H2" class="form-control"></div>
+            <div class="col-md-2"><input type="number" name="length" placeholder="Length/Radius" class="form-control"></div>
+            <div class="col-md-2"><input type="number" name="degree" placeholder="Degree/Offset" class="form-control"></div>
+            <div class="col-md-2"><input type="number" name="quantity" placeholder="Qty" class="form-control" required></div>
+            <div class="col-md-2"><input type="number" name="factor" placeholder="Factor" class="form-control"></div>
+            <div class="col-md-2">
+              <button type="submit" class="btn btn-success w-100">Add Entry</button>
             </div>
           </div>
         </form>
       </div>
+
+      <div class="form-section mt-3">
+        <h5>Measurement Table</h5>
+        <table class="table table-bordered table-sm" id="measurementTable">
+          <thead>
+            <tr>
+              <th>Duct No</th><th>Type</th><th>W1</th><th>H1</th><th>W2</th><th>H2</th><th>Length</th><th>Degree</th><th>Qty</th><th>Gauge</th>
+              <th>24g</th><th>22g</th><th>20g</th><th>18g</th>
+              <th>Cleat</th><th>Bolt</th><th>Gasket</th><th>Corner</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for entry in project.measurements %}
+            <tr>
+              <td>{{ entry.duct_no }}</td>
+              <td>{{ entry.duct_type }}</td>
+              <td>{{ entry.w1 }}</td>
+              <td>{{ entry.h1 }}</td>
+              <td>{{ entry.w2 }}</td>
+              <td>{{ entry.h2 }}</td>
+              <td>{{ entry.length }}</td>
+              <td>{{ entry.degree }}</td>
+              <td>{{ entry.quantity }}</td>
+              <td>{{ entry.gauge }}</td>
+              <td>{{ entry.area_24g or '' }}</td>
+              <td>{{ entry.area_22g or '' }}</td>
+              <td>{{ entry.area_20g or '' }}</td>
+              <td>{{ entry.area_18g or '' }}</td>
+              <td>{{ entry.cleat }}</td>
+              <td>{{ entry.bolt }}</td>
+              <td>{{ entry.gasket }}</td>
+              <td>{{ entry.corner }}</td>
+              <td>
+                <a href="{{ url_for('measurement.edit_measurement', entry_id=entry.id) }}" class="btn btn-sm btn-warning">Edit</a>
+                <a href="{{ url_for('measurement.delete_measurement', entry_id=entry.id) }}" class="btn btn-sm btn-danger">Delete</a>
+              </td>
+            </tr>
+            {% endfor %}
+            <tr class="totals-row">
+              <td colspan="10">Total</td>
+              <td>{{ totals['area_24g'] }}</td>
+              <td>{{ totals['area_22g'] }}</td>
+              <td>{{ totals['area_20g'] }}</td>
+              <td>{{ totals['area_18g'] }}</td>
+              <td>{{ totals['cleat'] }}</td>
+              <td>{{ totals['bolt'] }}</td>
+              <td>{{ totals['gasket'] }}</td>
+              <td>{{ totals['corner'] }}</td>
+              <td></td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="d-flex gap-2">
+          <a href="{{ url_for('measurement.export_pdf', project_id=project.id) }}" class="btn btn-secondary">Export PDF</a>
+          <a href="{{ url_for('measurement.export_excel', project_id=project.id) }}" class="btn btn-success">Export Excel</a>
+          <button class="btn btn-outline-primary" onclick="window.print()">Print</button>
+        </div>
+      </div>
     </div>
   </div>
+</div>
 
-  <!-- Table Section -->
-  <div class="table-section mt-4">
-    <table class="table table-bordered table-striped">
-      <thead class="table-dark">
-        <tr>
-          <th>Duct No</th>
-          <th>Type</th>
-          <th>W1</th>
-          <th>H1</th>
-          <th>W2</th>
-          <th>H2</th>
-          <th>Length/Radius</th>
-          <th>Degree/Offset</th>
-          <th>Qty</th>
-          <th>Gauge</th>
-          <th>24g</th>
-          <th>22g</th>
-          <th>20g</th>
-          <th>18g</th>
-          <th>Cleat</th>
-          <th>Bolts</th>
-          <th>Gasket</th>
-          <th>Corner</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% set total_24g = 0 %}
-        {% set total_22g = 0 %}
-        {% set total_20g = 0 %}
-        {% set total_18g = 0 %}
-        {% set total_cleat = 0 %}
-        {% set total_bolts = 0 %}
-        {% set total_gasket = 0 %}
-        {% set total_corner = 0 %}
-
-        {% for entry in entries %}
-          <tr>
-            <td>{{ entry.duct_no }}</td>
-            <td>{{ entry.duct_type }}</td>
-            <td>{{ entry.width1 }}</td>
-            <td>{{ entry.height1 }}</td>
-            <td>{{ entry.width2 or '' }}</td>
-            <td>{{ entry.height2 or '' }}</td>
-            <td>{{ entry.length_radius }}</td>
-            <td>{{ entry.degree_offset or '' }}</td>
-            <td>{{ entry.quantity }}</td>
-            <td>{{ entry.gauge }}</td>
-            <td>{% if entry.gauge == '24g' %}{{ entry.area }}{% set total_24g = total_24g + entry.area %}{% endif %}</td>
-            <td>{% if entry.gauge == '22g' %}{{ entry.area }}{% set total_22g = total_22g + entry.area %}{% endif %}</td>
-            <td>{% if entry.gauge == '20g' %}{{ entry.area }}{% set total_20g = total_20g + entry.area %}{% endif %}</td>
-            <td>{% if entry.gauge == '18g' %}{{ entry.area }}{% set total_18g = total_18g + entry.area %}{% endif %}</td>
-            <td>{{ entry.cleat }}{% set total_cleat = total_cleat + entry.cleat %}</td>
-            <td>{{ entry.bolts }}{% set total_bolts = total_bolts + entry.bolts %}</td>
-            <td>{{ entry.gasket }}{% set total_gasket = total_gasket + entry.gasket %}</td>
-            <td>{{ entry.corner }}{% set total_corner = total_corner + entry.corner %}</td>
-          </tr>
-        {% endfor %}
-      </tbody>
-      <tfoot class="table-warning fw-bold">
-        <tr>
-          <td colspan="10" class="text-end">TOTAL</td>
-          <td>{{ total_24g }}</td>
-          <td>{{ total_22g }}</td>
-          <td>{{ total_20g }}</td>
-          <td>{{ total_18g }}</td>
-          <td>{{ total_cleat }}</td>
-          <td>{{ total_bolts }}</td>
-          <td>{{ total_gasket }}</td>
-          <td>{{ total_corner }}</td>
-        </tr>
-      </tfoot>
-    </table>
-  </div>
-
-  <!-- Bottom Buttons -->
-  <div class="d-flex justify-content-end gap-2 mt-3">
-    <a href="{{ url_for('measurement.submit', project_id=project.id) }}" class="btn btn-primary">Submit</a>
-    <a href="{{ url_for('measurement.export_pdf', project_id=project.id) }}" class="btn btn-secondary">Export PDF</a>
-    <a href="{{ url_for('measurement.export_excel', project_id=project.id) }}" class="btn btn-info text-white">Export Excel</a>
-    <button onclick="window.print()" class="btn btn-dark">Print</button>
-  </div>
-
+<script>
+  document.getElementById("ductForm").addEventListener("submit", function (e) {
+    e.preventDefault();
+    const formData = new FormData(this);
+    fetch("{{ url_for('measurement.add_measurement', project_id=project.id) }}", {
+      method: "POST",
+      body: formData,
+    })
+    .then((res) => {
+      if (res.redirected) {
+        window.location.href = res.url;
+      }
+    });
+  });
+</script>
 </body>
 </html>
