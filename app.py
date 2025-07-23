@@ -133,6 +133,42 @@ def vendor_register():
     return render_template('vendor_register.html')
 
 
+@app.route('/add_measurement', methods=['POST'])
+def add_measurement():
+    if 'username' not in session:
+        return redirect(url_for('login'))
+
+    try:
+        duct_no = request.form['duct_no']
+        duct_type = request.form['duct_type']
+        w1 = float(request.form['w1'])
+        h1 = float(request.form['h1'])
+        w2 = float(request.form['w2'])
+        h2 = float(request.form['h2'])
+        offset = request.form['degree_offset']
+        length = request.form['length_radius']
+        qty = int(request.form['quantity'])
+        factor = request.form.get('factor', '1')
+
+        new_entry = MeasurementEntry(
+            duct_no=duct_no,
+            type=duct_type,
+            w1=w1,
+            h1=h1,
+            w2=w2,
+            h2=h2,
+            offset=offset,
+            length=length,
+            qty=qty,
+            factor=factor
+        )
+        db.session.add(new_entry)
+        db.session.commit()
+        return redirect(url_for('measurement_sheet'))
+    except Exception as e:
+        return f"Error: {str(e)}"
+
+
 @app.route('/measurement_sheet')
 def measurement_sheet():
     if 'username' not in session:
