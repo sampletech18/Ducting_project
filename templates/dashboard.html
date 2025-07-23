@@ -2,116 +2,102 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Dashboard</title>
+  <title>Ducting Dashboard</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <style>
-    * {
+    body {
       margin: 0;
       padding: 0;
-      box-sizing: border-box;
-    }
-
-    body {
-      font-family: Arial, sans-serif;
-      display: flex;
-      height: 100vh;
-      background: #f0f2f5;
     }
 
     .sidebar {
+      height: 100vh;
       width: 250px;
-      background: #343a40;
-      color: #fff;
+      position: fixed;
+      top: 0;
+      left: 0;
+      background-color: #343a40;
       padding-top: 20px;
-      flex-shrink: 0;
+      color: white;
     }
 
-    .sidebar h2 {
-      text-align: center;
-      margin-bottom: 20px;
+    .sidebar h4 {
+      color: #fff;
+      padding-left: 20px;
     }
 
     .sidebar ul {
       list-style: none;
-      padding-left: 0;
+      padding: 0;
     }
 
-    .sidebar li {
-      padding: 12px 20px;
+    .sidebar ul li {
+      padding: 10px 20px;
       cursor: pointer;
-      border-bottom: 1px solid #495057;
     }
 
-    .sidebar li:hover {
+    .sidebar ul li:hover {
       background-color: #495057;
+    }
+
+    .content {
+      margin-left: 250px;
+      padding: 20px;
     }
 
     .submenu {
-      background-color: #495057;
-      display: none;
+      padding-left: 20px;
+      font-size: 0.95rem;
     }
 
     .submenu li {
-      padding-left: 40px;
-      font-size: 14px;
+      padding: 5px 0;
     }
 
-    .main-content {
-      flex: 1;
-      padding: 30px;
-    }
-
-    .main-content h1 {
-      color: #333;
-    }
-
-    .toggle::after {
-      content: ' ▼';
-      float: right;
+    .submenu li:hover {
+      background-color: #495057;
     }
   </style>
-  <script>
-    function toggleSubmenu(id) {
-      var el = document.getElementById(id);
-      el.style.display = el.style.display === 'block' ? 'none' : 'block';
-    }
-  </script>
 </head>
 <body>
 
   <div class="sidebar">
-    <h2>Ducting App</h2>
+    <h4>Ducting Panel</h4>
     <ul>
-      <li class="toggle" onclick="toggleSubmenu('enquiry')">Enquiry</li>
-      <ul id="enquiry" class="submenu">
-        <li onclick="location.href='/new_project'">New Project</li>
-      </ul>
-
-      <li class="toggle" onclick="toggleSubmenu('progress')">Progress</li>
-      <ul id="progress" class="submenu">
-        <li onclick="location.href='/progress/preparation'">Preparation</li>
-        <li onclick="location.href='/progress/sheet-cutting'">Sheet Cutting</li>
-        <li onclick="location.href='/progress/fabrication'">Fabrication</li>
-        <li onclick="location.href='/progress/dispatch'">Dispatch</li>
-      </ul>
-
-      <li class="toggle" onclick="toggleSubmenu('summary')">Summary</li>
-      <ul id="summary" class="submenu">
-        <li onclick="location.href='/summary/day-wise'">Day Wise</li>
-        <li onclick="location.href='/summary/weekly'">Weekly Wise</li>
-        <li onclick="location.href='/summary/monthly'">Monthly Wise</li>
-      </ul>
-
-      <li class="toggle" onclick="toggleSubmenu('register')">Register</li>
-      <ul id="register" class="submenu">
-        <li onclick="location.href='/register/vendor'">Vendor Registration</li>
-        <li onclick="location.href='/register/employee'">Employee Registration</li>
-      </ul>
+      <li>Enquiry
+        <ul class="submenu">
+          <li>New Project</li>
+          <li>Progress Table</li>
+          <li>Summary</li>
+        </ul>
+      </li>
+      <li>Production
+        <ul class="submenu">
+          <li>Preparation</li>
+          <li>Sheet Cutting</li>
+          <li>Fabrication</li>
+          <li>Dispatch</li>
+        </ul>
+      </li>
+      <li>Reports
+        <ul class="submenu">
+          <li>Day-wise</li>
+          <li>Weekly</li>
+          <li>Monthly</li>
+        </ul>
+      </li>
+      <li>Register
+        <ul class="submenu">
+          <li>Vendor Registration</li>
+          <li>Employee Registration</li>
+        </ul>
+      </li>
     </ul>
   </div>
 
-  <div class="main-content">
-    <h1>Welcome to the Ducting Dashboard</h1>
-    <p>Select an option from the sidebar to get started.</p>
+  <div class="content">
+    <h2>Welcome to the Ducting Dashboard</h2>
+    <p>Select any section from the left to get started.</p>
   </div>
 
 </body>
