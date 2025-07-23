@@ -121,7 +121,7 @@
       e.preventDefault();
       const formData = new FormData(this);
       const data = Object.fromEntries(formData.entries());
-      const response = await fetch('/measurement/add', {
+      const response = await fetch('/measurement', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)
