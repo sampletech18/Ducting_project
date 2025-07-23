@@ -1,17 +1,16 @@
-from flask import Blueprint
-from app.models import db, Vendor
+from flask import Blueprint, jsonify
+from ..models import db, Vendor
 
 seed_bp = Blueprint('seed', __name__)
 
-@seed_bp.route('/seed')
-def seed():
-    if Vendor.query.first():
-        return "Vendors already exist."
-
+@seed_bp.route('/seed/vendors')
+def seed_vendors():
     dummy_vendors = [
-        Vendor(name='ABC Corp', gst_no='29ABCDE1234F2Z5', address='Bangalore'),
-        Vendor(name='XYZ Ltd', gst_no='07XYZDE1234F1Z9', address='Delhi')
+        Vendor(name="ABC Steels", gst_number="GST1234", address="Chennai"),
+        Vendor(name="XYZ Metals", gst_number="GST5678", address="Coimbatore"),
+        Vendor(name="LMN Fabricators", gst_number="GST9012", address="Madurai")
     ]
+
     db.session.bulk_save_objects(dummy_vendors)
     db.session.commit()
-    return "Vendors seeded!"
+    return jsonify({"message": "Dummy vendors added successfully!"})
