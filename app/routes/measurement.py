@@ -142,9 +142,3 @@ def export_excel(project_id):
     return f"Excel export logic for project {project_id}"
 
 
-@measurement_bp.route("/add-measurement/<int:project_id>", methods=["POST"])
-@login_required
-def add_measurement(project_id):
-    data = request.get_json()
-    # your logic to process and save entry
-    return jsonify({"status": "success"})
