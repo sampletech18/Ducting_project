@@ -117,11 +117,21 @@ def vendor_register():
         return "Vendor Registered Successfully!"
     return render_template('vendor_register.html')
 
-
 @app.route('/init_db')
 def init_db():
     db.create_all()
-    return "Database initialized!"
+
+    # Check if vendors already exist
+    if Vendor.query.first() is None:
+        sample_vendors = [
+            Vendor(name="Perfect Fabricators", gst="29ABCDE1234F1Z5", address="Chennai, TN"),
+            Vendor(name="Duct Tech Engineers", gst="29FGHIJ5678K9Z5", address="Coimbatore, TN"),
+            Vendor(name="Sheet Metal Works", gst="29KLMNO9876P1Z5", address="Madurai, TN")
+        ]
+        db.session.add_all(sample_vendors)
+        db.session.commit()
+
+    return "Database initialized with sample vendors!"
 
 # ========== Run ==========
 if __name__ == '__main__':
