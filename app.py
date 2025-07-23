@@ -117,6 +117,12 @@ def vendor_register():
         return "Vendor Registered Successfully!"
     return render_template('vendor_register.html')
 
+
+@app.route('/init_db')
+def init_db():
+    db.create_all()
+    return "Database initialized!"
+
 # ========== Run ==========
 if __name__ == '__main__':
     with app.app_context():
