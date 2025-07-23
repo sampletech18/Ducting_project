@@ -117,7 +117,7 @@
           <td>
             <button class="btn btn-sm btn-warning">Edit</button>
             <button class="btn btn-sm btn-danger">Delete</button>
-            <button class="btn btn-sm btn-info">Add Measurement Sheet</button>
+            <a href="{{ url_for('measurement_sheet', project_id=project.id) }}" class="btn btn-sm btn-info">Add Measurement Sheet</a>
           </td>
         </tr>
       {% endfor %}
