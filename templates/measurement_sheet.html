@@ -26,7 +26,7 @@
     <!-- Right: Form -->
     <div class="col-md-8">
       <div class="form-section">
-        <form method="post" action="/measurement_sheet/{{ project_id }}">
+        <form method="post" action="{{ url_for('measurement_sheet', project_id=project.id) }}">
           <div class="row g-2">
             <div class="col-md-2"><input name="duct_no" class="form-control" placeholder="Duct No" required></div>
             <div class="col-md-2">
