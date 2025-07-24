@@ -4,7 +4,6 @@ import random
 import math
 from datetime import datetime
 
-
 app = Flask(__name__)
 app.secret_key = 'supersecretkey'
 
@@ -21,7 +20,6 @@ class Vendor(db.Model):
     name = db.Column(db.String(150))
     gst = db.Column(db.String(50))
     address = db.Column(db.String(250))
-
 
 class Project(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -154,8 +152,8 @@ def add_measurement():
         qty = int(request.form.get('quantity') or 1)
         factor = float(request.form.get('factor') or 1)
 
+        # AREA CALCULATION
         area = 0
-
         if duct_type == "ST":
             area = 2 * (w1 + h1) / 1000 * (length / 1000) * qty
         elif duct_type == "RED":
@@ -172,6 +170,7 @@ def add_measurement():
             arc = (length / 1000) * math.pi * (degree / 180)
             area = 2 * (w1 + h1) / 1000 * (((h1 / 2) / 1000) + arc) * qty * factor
 
+        # HARDWARE CALCULATION
         perimeter = w1 + h1 + w2 + h2
         nuts_bolts = (perimeter / 1000) * 8 * qty
         cleat = (perimeter / 1000) * 4 * qty
@@ -205,7 +204,6 @@ def add_measurement():
         import traceback
         traceback.print_exc()
         return f"Error: {str(e)}"
-
 
 @app.route('/measurement_sheet/<int:project_id>')
 def measurement_sheet(project_id):
@@ -244,4 +242,3 @@ if __name__ == '__main__':
     with app.app_context():
         db.create_all()
     app.run(debug=True)
-    
