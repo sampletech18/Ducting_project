@@ -9,6 +9,9 @@ app.secret_key = 'your_secret_key'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///ducting.db'
 db = SQLAlchemy(app)
 
+with app.app_context():
+    db.create_all()
+
 # Models
 class Vendor(db.Model):
     id = db.Column(db.Integer, primary_key=True)
