@@ -213,24 +213,22 @@ def measurement_sheet(project_id):
     project = Project.query.get_or_404(project_id)
 
     if request.method == 'POST':
-        # Handle form submission
         try:
             new_entry = MeasurementEntry(
                 project_id=project_id,
                 duct_no=request.form['duct_no'],
-                type=request.form['duct_type'],
+                duct_type=request.form['duct_type'],
                 w1=float(request.form['w1']),
                 h1=float(request.form['h1']),
                 w2=float(request.form['w2']),
                 h2=float(request.form['h2']),
-                offset=request.form['degree_offset'],
-                length=request.form['length_radius'],
-                qty=int(request.form['quantity']),
-                factor=float(request.form.get('factor', '1'))
+                degree=request.form.get('degree'),  # matches HTML
+                length=request.form.get('length'),  # matches HTML
+                qty=int(request.form['qty']),
+                factor=float(request.form.get('factor', 1))
             )
 
-            # Call your formula function here based on duct_type
-            apply_duct_calculation(new_entry)  # <-- implement this separately
+            apply_duct_calculation(new_entry)
 
             db.session.add(new_entry)
             db.session.commit()
@@ -245,9 +243,19 @@ def measurement_sheet(project_id):
     return render_template(
         'measurement_sheet.html',
         project=project,
-        measurements=measurements
+        project_id=project_id,  # ✅ also needed in template
+        measurements=measurements,
+        total_qty=sum(m.qty for m in measurements),
+        total_area=sum(m.area or 0 for m in measurements),
+        total_24g=sum(m.g24 or 0 for m in measurements),
+        total_22g=sum(m.g22 or 0 for m in measurements),
+        total_20g=sum(m.g20 or 0 for m in measurements),
+        total_18g=sum(m.g18 or 0 for m in measurements),
+        total_bolts=sum(m.bolts or 0 for m in measurements),
+        total_cleat=sum(m.cleat or 0 for m in measurements),
+        total_gasket=sum(m.gasket or 0 for m in measurements),
+        total_corner=sum(m.corner or 0 for m in measurements)
     )
-
 @app.route('/init_db')
 def init_db():
     try:
