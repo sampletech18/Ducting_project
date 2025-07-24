@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, redirect, url_for, session, jsonify
 from flask_sqlalchemy import SQLAlchemy
 import random
+import math
 from datetime import datetime
 
 app = Flask(__name__)
@@ -216,8 +217,12 @@ def add_measurement():
         db.session.commit()
         return redirect(url_for('measurement_sheet', project_id=project_id))
 
-    except Exception as e:
-        return f"Error: {str(e)}"
+        except Exception as e:
+    import traceback
+    traceback.print_exc()
+    return f"Error: {str(e)}"
+
+
 
 
 
