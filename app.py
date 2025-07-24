@@ -3,6 +3,7 @@ from flask_sqlalchemy import SQLAlchemy
 import random
 import math
 from datetime import datetime
+from models import Project, MeasurementEntry
 
 app = Flask(__name__)
 app.secret_key = 'supersecretkey'
@@ -204,6 +205,21 @@ def add_measurement():
         import traceback
         traceback.print_exc()
         return f"Error: {str(e)}"
+
+
+@app.route('/measurement_sheet/<int:project_id>')
+def measurement_sheet(project_id):
+    if 'username' not in session:
+        return redirect(url_for('login'))
+
+    project = Project.query.get_or_404(project_id)
+    measurements = MeasurementEntry.query.filter_by(project_id=project_id).all()
+
+    return render_template(
+        'measurement_sheet.html',
+        project=project,
+        measurements=measurements
+    )
 
 @app.route('/init_db')
 def init_db():
