@@ -214,18 +214,25 @@ def measurement_sheet(project_id):
 
     if request.method == 'POST':
         try:
+            # Helper to safely convert form inputs
+            def safe_float(value):
+                return float(value) if value.strip() else 0.0
+
+            def safe_int(value):
+                return int(value) if value.strip() else 0
+
             new_entry = MeasurementEntry(
                 project_id=project_id,
-                duct_no=request.form['duct_no'],
-                duct_type=request.form['duct_type'],
-                w1=float(request.form['w1']),
-                h1=float(request.form['h1']),
-                w2=float(request.form['w2']),
-                h2=float(request.form['h2']),
-                degree=request.form.get('degree'),  # matches HTML
-                length=request.form.get('length'),  # matches HTML
-                qty=int(request.form['qty']),
-                factor=float(request.form.get('factor', 1))
+                duct_no=request.form.get('duct_no', ''),
+                duct_type=request.form.get('duct_type', ''),
+                w1=safe_float(request.form.get('w1', '0')),
+                h1=safe_float(request.form.get('h1', '0')),
+                w2=safe_float(request.form.get('w2', '0')),
+                h2=safe_float(request.form.get('h2', '0')),
+                degree=request.form.get('degree', ''),
+                length=safe_float(request.form.get('length', '0')),
+                qty=safe_int(request.form.get('qty', '0')),
+                factor=safe_float(request.form.get('factor', '1'))
             )
 
             apply_duct_calculation(new_entry)
@@ -243,7 +250,7 @@ def measurement_sheet(project_id):
     return render_template(
         'measurement_sheet.html',
         project=project,
-        project_id=project_id,  # ✅ also needed in template
+        project_id=project_id,
         measurements=measurements,
         total_qty=sum(m.qty for m in measurements),
         total_area=sum(m.area or 0 for m in measurements),
