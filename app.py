@@ -3,7 +3,7 @@ from flask_sqlalchemy import SQLAlchemy
 import random
 import math
 from datetime import datetime
-from models import Project, MeasurementEntry
+
 
 app = Flask(__name__)
 app.secret_key = 'supersecretkey'
