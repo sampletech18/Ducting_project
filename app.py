@@ -45,7 +45,7 @@ class MeasurementEntry(db.Model):
     h1 = db.Column(db.Float, default=0)
     w2 = db.Column(db.Float, default=0)
     h2 = db.Column(db.Float, default=0)
-    offset=safe_float(request.form.get('degree')),
+    offset = db.Column(db.Float, default=0)  # renamed from 'degree'
     length = db.Column(db.Float, default=0)
     qty = db.Column(db.Integer, default=1)
     factor = db.Column(db.Float, default=1.0)
@@ -54,7 +54,6 @@ class MeasurementEntry(db.Model):
     cleat = db.Column(db.Float, default=0.0)
     gasket = db.Column(db.Float, default=0.0)
     corner_pieces = db.Column(db.Integer, default=0)
-
 # ========== USERS ==========
 
 users = {
