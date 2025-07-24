@@ -36,26 +36,37 @@ class Project(db.Model):
     notes = db.Column(db.String(300))
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
-class MeasurementEntry(db.Model):
+
+class Measurement(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     project_id = db.Column(db.Integer, db.ForeignKey('project.id'), nullable=False)
+    
     duct_no = db.Column(db.String(50), nullable=False)
     type = db.Column(db.String(20), nullable=False)
+    
     w1 = db.Column(db.Float, default=0)
     h1 = db.Column(db.Float, default=0)
     w2 = db.Column(db.Float, default=0)
     h2 = db.Column(db.Float, default=0)
-    degree = db.Column(db.Float, default=0)  # ✅ Correct field name
+    degree = db.Column(db.Float, default=0)
     length = db.Column(db.Float, default=0)
+    
     qty = db.Column(db.Integer, default=1)
     factor = db.Column(db.Float, default=1.0)
+
     area = db.Column(db.Float, default=0.0)
-    nuts_bolts = db.Column(db.Float, default=0.0)
-    cleat = db.Column(db.Float, default=0.0)
-    gasket = db.Column(db.Float, default=0.0)
-    corner_pieces = db.Column(db.Integer, default=0)
 
+    g24 = db.Column(db.Float, default=0.0)
+    g22 = db.Column(db.Float, default=0.0)
+    g20 = db.Column(db.Float, default=0.0)
+    g18 = db.Column(db.Float, default=0.0)
 
+    bolts = db.Column(db.Integer, default=0)
+    cleat = db.Column(db.Integer, default=0)
+    gasket = db.Column(db.Integer, default=0)
+    corner = db.Column(db.Integer, default=0)
+
+    project = db.relationship('Project', backref=db.backref('measurements', lazy=True))
 # ========== USERS ==========
 
 users = {
@@ -210,64 +221,106 @@ def add_measurement():
 
 @app.route('/measurement_sheet/<int:project_id>', methods=['GET', 'POST'])
 def measurement_sheet(project_id):
-    if 'username' not in session:
-        return redirect(url_for('login'))
-
     project = Project.query.get_or_404(project_id)
 
-    def safe_float(value, default=0.0):
-        try:
-            return float(value)
-        except (ValueError, TypeError):
-            return default
-
-    def safe_int(value, default=0):
-        try:
-            return int(value)
-        except (ValueError, TypeError):
-            return default
-
     if request.method == 'POST':
-        try:
-            new_entry = MeasurementEntry(
-                project_id=project_id,
-                duct_no=request.form.get('duct_no', ''),
-                type=request.form.get('type', ''),
-                w1=safe_float(request.form.get('w1')),
-                h1=safe_float(request.form.get('h1')),
-                w2=safe_float(request.form.get('w2')),
-                h2=safe_float(request.form.get('h2')),
-                degree=safe_float(request.form.get('degree')),
-                length=safe_float(request.form.get('length')),
-                qty=safe_int(request.form.get('qty')),
-                factor=safe_float(request.form.get('factor', 1))
-            )
+        duct_no = request.form['duct_no']
+        type = request.form['type']
+        w1 = float(request.form.get('w1') or 0)
+        h1 = float(request.form.get('h1') or 0)
+        w2 = float(request.form.get('w2') or 0)
+        h2 = float(request.form.get('h2') or 0)
+        degree = float(request.form.get('degree') or 0)
+        length = float(request.form.get('length') or 0)
+        qty = int(request.form.get('qty') or 1)
+        factor = float(request.form.get('factor') or 1)
 
-            apply_duct_calculation(new_entry)  # Your backend formulas
+        area = 0
+        if type == 'ST':
+            area = 2 * ((w1 + h1) * length) / 1000000
+        elif type == 'ELB':
+            area = 2 * ((w1 + h1) * (1.57 * (w1 + h1) / 2)) / 1000000
+        elif type == 'RED':
+            area = ((w1 + h1 + w2 + h2) * length) / 1000000
+        elif type == 'DM':
+            area = 2 * ((w1 + h1 + w2 + h2) * length) / 2000000
+        elif type == 'OFFSET':
+            area = 2 * ((w1 + h1) * length) / 1000000
+        elif type == 'SHOE':
+            area = 2 * ((w1 + h1) * length) / 1000000
+        elif type == 'VANES':
+            area = ((w1 * h1) * 1.2) / 1000000
 
-            db.session.add(new_entry)
-            db.session.commit()
+        area = area * qty * factor
+        g24 = g22 = g20 = g18 = 0
 
-            return redirect(url_for('measurement_sheet', project_id=project_id))
+        if max(w1, w2) <= 750 and max(h1, h2) <= 750:
+            g24 = area
+        elif 751 <= max(w1, w2) <= 1200 or 751 <= max(h1, h2) <= 1200:
+            g22 = area
+        elif 1201 <= max(w1, w2) <= 1800 or 1201 <= max(h1, h2) <= 1800:
+            g20 = area
+        else:
+            g18 = area
 
-        except Exception as e:
-            import traceback
-            traceback.print_exc()
-            return f"Error: {str(e)}"
+        bolts = round((area * 12) / 100)
+        cleat = round((area * 15) / 100)
+        gasket = round((area * 10) / 100)
+        corner = round((area * 8) / 100)
 
-    measurements = MeasurementEntry.query.filter_by(project_id=project_id).all()
+        new_entry = Measurement(
+            duct_no=duct_no,
+            type=type,
+            w1=w1,
+            h1=h1,
+            w2=w2,
+            h2=h2,
+            degree=degree,
+            length=length,
+            qty=qty,
+            factor=factor,
+            area=round(area, 2),
+            g24=round(g24, 2),
+            g22=round(g22, 2),
+            g20=round(g20, 2),
+            g18=round(g18, 2),
+            bolts=bolts,
+            cleat=cleat,
+            gasket=gasket,
+            corner=corner,
+            project_id=project_id
+        )
+        db.session.add(new_entry)
+        db.session.commit()
+        return redirect(url_for('measurement_sheet', project_id=project_id))
 
-    total_area = sum(m.area for m in measurements)
+    measurements = Measurement.query.filter_by(project_id=project_id).all()
     total_qty = sum(m.qty for m in measurements)
+    total_area = round(sum(m.area for m in measurements), 2)
+    total_24g = round(sum(m.g24 for m in measurements), 2)
+    total_22g = round(sum(m.g22 for m in measurements), 2)
+    total_20g = round(sum(m.g20 for m in measurements), 2)
+    total_18g = round(sum(m.g18 for m in measurements), 2)
+    total_bolts = sum(m.bolts for m in measurements)
+    total_cleat = sum(m.cleat for m in measurements)
+    total_gasket = sum(m.gasket for m in measurements)
+    total_corner = sum(m.corner for m in measurements)
 
-    return render_template(
-        'measurement_sheet.html',
+    return render_template('measurement_sheet.html',
         project=project,
         measurements=measurements,
+        total_qty=total_qty,
         total_area=total_area,
-        total_qty=total_qty
-    )
-
+        total_24g=total_24g,
+        total_22g=total_22g,
+        total_20g=total_20g,
+        total_18g=total_18g,
+        total_bolts=total_bolts,
+        total_cleat=total_cleat,
+        total_gasket=total_gasket,
+        total_corner=total_corner,
+        project_id=project_id
+                          )
 
 @app.route('/init_db')
 def init_db():
