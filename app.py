@@ -225,41 +225,85 @@ def add_measurement():
 
 
 
-
-@app.route('/measurement_sheet/<int:project_id>')
-def measurement_sheet(project_id):
+@app.route('/add_measurement', methods=['POST'])
+def add_measurement():
     if 'username' not in session:
         return redirect(url_for('login'))
 
-    project = Project.query.get_or_404(project_id)
-    entries = MeasurementEntry.query.filter_by(project_id=project_id).all()
-    return render_template('measurement_sheet.html', project=project, entries=entries)
-
-
-@app.route('/submit_measurements', methods=['POST'])
-def submit_measurements():
     try:
-        data = request.json.get('entries', [])
-        for item in data:
-            entry = MeasurementEntry(
-                duct_no=item.get('duct_no'),
-                type=item.get('type'),
-                w1=item.get('w1'),
-                h1=item.get('h1'),
-                w2=item.get('w2'),
-                h2=item.get('h2'),
-                offset=item.get('offset'),
-                length=item.get('length'),
-                qty=item.get('qty'),
-                factor=item.get('factor'),
-                project_id=item.get('project_id')  # must be included from frontend
-            )
-            db.session.add(entry)
+        project_id = int(request.form['project_id'])
+        duct_no = request.form['duct_no']
+        duct_type = request.form['duct_type']
+        w1 = float(request.form.get('w1') or 0)
+        h1 = float(request.form.get('h1') or 0)
+        w2 = float(request.form.get('w2') or 0)
+        h2 = float(request.form.get('h2') or 0)
+        length = float(request.form.get('length_radius') or 0)
+        degree = float(request.form.get('degree_offset') or 0)
+        qty = int(request.form.get('quantity') or 1)
+        factor = float(request.form.get('factor') or 1)
+
+        area = 0
+
+        if duct_type == "ST":
+            area = 2 * (w1 + h1) / 1000 * (length / 1000) * qty
+
+        elif duct_type == "RED":
+            area = (w1 + h1 + w2 + h2) / 1000 * (length / 1000) * qty * factor
+
+        elif duct_type == "DM":
+            area = (w1 * h1) / 1000000 * qty
+
+        elif duct_type == "OFFSET":
+            area = (w1 + h1 + w2 + h2) / 1000 * ((length + degree) / 1000) * qty * factor
+
+        elif duct_type == "SHOE":
+            area = (w1 + h1) * 2 / 1000 * (length / 1000) * qty * factor
+
+        elif duct_type == "VANES":
+            area = (w1 / 1000) * (2 * math.pi * (w1 / 1000) / 4) * qty
+
+        elif duct_type == "ELB":
+            arc = (length / 1000) * math.pi * (degree / 180)
+            area = 2 * (w1 + h1) / 1000 * (((h1 / 2) / 1000) + arc) * qty * factor
+
+        # Accessories
+        perimeter = w1 + h1 + w2 + h2
+        nuts_bolts = (perimeter / 1000) * 8 * qty
+        cleat = (perimeter / 1000) * 4 * qty
+        gasket = (perimeter / 1000) * qty
+        corner_pieces = 4 * qty
+
+        # Save to DB
+        new_entry = MeasurementEntry(
+            project_id=project_id,
+            duct_no=duct_no,
+            type=duct_type,
+            w1=w1,
+            h1=h1,
+            w2=w2,
+            h2=h2,
+            offset=degree,
+            length=length,
+            qty=qty,
+            factor=factor,
+            area=round(area, 3),
+            nuts_bolts=round(nuts_bolts, 2),
+            cleat=round(cleat, 2),
+            gasket=round(gasket, 2),
+            corner_pieces=corner_pieces
+        )
+
+        db.session.add(new_entry)
         db.session.commit()
-        return jsonify({'message': 'Data saved successfully'}), 200
+        return redirect(url_for('measurement_sheet', project_id=project_id))
+
     except Exception as e:
-        db.session.rollback()
-        return jsonify({'error': str(e)}), 400
+        import traceback
+        traceback.print_exc()
+        return f"Error: {str(e)}"
+
+
 
 
 @app.route('/init_db')
