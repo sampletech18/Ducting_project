@@ -36,21 +36,28 @@ class Project(db.Model):
     notes = db.Column(db.String(300))
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
-
 class MeasurementEntry(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    duct_no = db.Column(db.String(50))
-    type = db.Column(db.String(50))
-    w1 = db.Column(db.Float)
-    h1 = db.Column(db.Float)
-    w2 = db.Column(db.Float)
-    h2 = db.Column(db.Float)
-    offset = db.Column(db.String(50))
-    length = db.Column(db.String(50))
-    qty = db.Column(db.Integer)
-    factor = db.Column(db.String(20))
-    project_id = db.Column(db.Integer, db.ForeignKey('project.id'))
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    project_id = db.Column(db.Integer, db.ForeignKey('project.id'), nullable=False)
+    duct_no = db.Column(db.String(50), nullable=False)
+    type = db.Column(db.String(20), nullable=False)
+    w1 = db.Column(db.Float, default=0)
+    h1 = db.Column(db.Float, default=0)
+    w2 = db.Column(db.Float, default=0)
+    h2 = db.Column(db.Float, default=0)
+    offset = db.Column(db.Float, default=0)
+    length = db.Column(db.Float, default=0)
+    qty = db.Column(db.Integer, default=1)
+    factor = db.Column(db.Float, default=1.0)
+
+    # New fields for calculations
+    area = db.Column(db.Float, default=0.0)
+    nuts_bolts = db.Column(db.Float, default=0.0)
+    cleat = db.Column(db.Float, default=0.0)
+    gasket = db.Column(db.Float, default=0.0)
+    corner_pieces = db.Column(db.Integer, default=0)
+
+
 
 # ========== USERS (Dummy) ==========
 
@@ -143,26 +150,75 @@ def add_measurement():
 
     try:
         project_id = int(request.form['project_id'])
+        duct_no = request.form['duct_no']
+        duct_type = request.form['duct_type']
+        w1 = float(request.form.get('w1') or 0)
+        h1 = float(request.form.get('h1') or 0)
+        w2 = float(request.form.get('w2') or 0)
+        h2 = float(request.form.get('h2') or 0)
+        length = float(request.form.get('length_radius') or 0)
+        degree = float(request.form.get('degree_offset') or 0)
+        qty = int(request.form.get('quantity') or 1)
+        factor = float(request.form.get('factor') or 1)
 
+        area = 0
+
+        if duct_type == "ST":
+            area = 2 * (w1 + h1) / 1000 * (length / 1000) * qty
+
+        elif duct_type == "RED":
+            area = (w1 + h1 + w2 + h2) / 1000 * (length / 1000) * qty * factor
+
+        elif duct_type == "DM":
+            area = (w1 * h1) / 1000000 * qty
+
+        elif duct_type == "OFFSET":
+            area = (w1 + h1 + w2 + h2) / 1000 * ((length + degree) / 1000) * qty * factor
+
+        elif duct_type == "SHOE":
+            area = (w1 + h1) * 2 / 1000 * (length / 1000) * qty * factor
+
+        elif duct_type == "VANES":
+            area = (w1 / 1000) * (2 * math.pi * (w1 / 1000) / 4) * qty
+
+        elif duct_type == "ELB":
+            arc = (length / 1000) * math.pi * (degree / 180)
+            area = 2 * (w1 + h1) / 1000 * (((h1 / 2) / 1000) + arc) * qty * factor
+
+        # Accessories
+        perimeter = w1 + h1 + w2 + h2
+        nuts_bolts = (perimeter / 1000) * 8 * qty
+        cleat = (perimeter / 1000) * 4 * qty
+        gasket = (perimeter / 1000) * qty
+        corner_pieces = 4 * qty
+
+        # Save to DB
         new_entry = MeasurementEntry(
             project_id=project_id,
-            duct_no=request.form['duct_no'],
-            type=request.form['duct_type'],
-            w1=float(request.form['w1']),
-            h1=float(request.form['h1']),
-            w2=float(request.form['w2']),
-            h2=float(request.form['h2']),
-            offset=request.form['degree_offset'],
-            length=request.form['length_radius'],
-            qty=int(request.form['quantity']),
-            factor=request.form.get('factor', '1')
+            duct_no=duct_no,
+            type=duct_type,
+            w1=w1,
+            h1=h1,
+            w2=w2,
+            h2=h2,
+            offset=degree,
+            length=length,
+            qty=qty,
+            factor=factor,
+            area=round(area, 3),
+            nuts_bolts=round(nuts_bolts, 2),
+            cleat=round(cleat, 2),
+            gasket=round(gasket, 2),
+            corner_pieces=corner_pieces
         )
 
         db.session.add(new_entry)
         db.session.commit()
         return redirect(url_for('measurement_sheet', project_id=project_id))
+
     except Exception as e:
         return f"Error: {str(e)}"
+
 
 
 @app.route('/measurement_sheet/<int:project_id>')
