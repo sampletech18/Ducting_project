@@ -46,19 +46,19 @@
         <h5>Duct Entry</h5>
         <form id="ductForm" class="row g-2">
           <div class="col-md-2"><input type="text" name="duct_no" class="form-control" placeholder="Duct No" required></div>
-          <div class="col-md-2">
-  <select name="type" class="form-select" required>
-    <option value="" disabled selected>Select Type</option>
-    <option value="Straight">Straight</option>
-    <option value="Elbow">Elbow</option>
-    <option value="Reducer">Reducer</option>
-    <option value="Offset">Offset</option>
-    <option value="Tee">Tee</option>
-    <option value="Cross">Cross</option>
-    <option value="Y-Branch">Y-Branch</option>
-    <option value="Transition">Transition</option>
+          <div class="mb-3">
+  <label for="duct_type" class="form-label">Duct Type</label>
+  <select class="form-select" id="duct_type" name="duct_type" required>
+    <option value="">-- Select Duct Type --</option>
+    <option value="ST">ST</option>
+    <option value="RED">RED</option>
+    <option value="DM">DM</option>
+    <option value="OFFSET">OFFSET</option>
+    <option value="SHOE">SHOE</option>
+    <option value="VANES">VANES</option>
+    <option value="ELB">ELB</option>
   </select>
-</div>
+          </div>
           <div class="col-md-1"><input type="number" name="w1" class="form-control" placeholder="W1" required></div>
           <div class="col-md-1"><input type="number" name="h1" class="form-control" placeholder="H1" required></div>
           <div class="col-md-1"><input type="number" name="w2" class="form-control" placeholder="W2"></div>
