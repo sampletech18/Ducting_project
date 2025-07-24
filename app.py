@@ -121,15 +121,20 @@ def vendors():
     vendor_list = Vendor.query.all()
     return render_template('vendors.html', vendors=vendor_list)
 
-@app.route('/add_vendor', methods=['POST'])
-def add_vendor():
-    name = request.form['name']
-    gst_number = request.form['gst_number']
-    address = request.form['address']
-    new_vendor = Vendor(name=name, gst_number=gst_number, address=address)
-    db.session.add(new_vendor)
-    db.session.commit()
-    return redirect(url_for('vendors'))
+
+
+
+@app.route('/vendor_register', methods=['GET', 'POST'])
+def vendor_register():
+    if request.method == 'POST':
+        name = request.form['name']
+        gst_number = request.form['gst_number']
+        address = request.form['address']
+        new_vendor = Vendor(name=name, gst_number=gst_number, address=address)
+        db.session.add(new_vendor)
+        db.session.commit()
+        return redirect(url_for('login'))
+    return render_template('vendor_register.html')
 
 @app.route('/measurement_sheet/<int:project_id>', methods=['GET', 'POST'])
 def measurement_sheet(project_id):
