@@ -50,17 +50,13 @@ class MeasurementEntry(db.Model):
     length = db.Column(db.Float, default=0)
     qty = db.Column(db.Integer, default=1)
     factor = db.Column(db.Float, default=1.0)
-
-    # New fields for calculations
     area = db.Column(db.Float, default=0.0)
     nuts_bolts = db.Column(db.Float, default=0.0)
     cleat = db.Column(db.Float, default=0.0)
     gasket = db.Column(db.Float, default=0.0)
     corner_pieces = db.Column(db.Integer, default=0)
 
-
-
-# ========== USERS (Dummy) ==========
+# ========== USERS ==========
 
 users = {
     'admin': {'password': 'admin123', 'role': 'admin'},
@@ -84,19 +80,16 @@ def login():
             msg = 'Invalid credentials'
     return render_template('login.html', msg=msg)
 
-
 @app.route('/dashboard')
 def dashboard():
     if 'username' not in session:
         return redirect(url_for('login'))
     return render_template('dashboard.html', user=session['username'], role=session['role'])
 
-
 @app.route('/logout')
 def logout():
     session.clear()
     return redirect(url_for('login'))
-
 
 @app.route('/new_project', methods=['GET', 'POST'])
 def new_project():
@@ -129,7 +122,6 @@ def new_project():
     projects = Project.query.all()
     return render_template('new_project.html', enquiry_id=enquiry_id, vendors=vendors, projects=projects)
 
-
 @app.route('/register/vendor', methods=['GET', 'POST'])
 def vendor_register():
     if request.method == 'POST':
@@ -142,7 +134,6 @@ def vendor_register():
         db.session.commit()
         return "Vendor Registered Successfully!"
     return render_template('vendor_register.html')
-
 
 @app.route('/add_measurement', methods=['POST'])
 def add_measurement():
@@ -166,34 +157,26 @@ def add_measurement():
 
         if duct_type == "ST":
             area = 2 * (w1 + h1) / 1000 * (length / 1000) * qty
-
         elif duct_type == "RED":
             area = (w1 + h1 + w2 + h2) / 1000 * (length / 1000) * qty * factor
-
         elif duct_type == "DM":
             area = (w1 * h1) / 1000000 * qty
-
         elif duct_type == "OFFSET":
             area = (w1 + h1 + w2 + h2) / 1000 * ((length + degree) / 1000) * qty * factor
-
         elif duct_type == "SHOE":
             area = (w1 + h1) * 2 / 1000 * (length / 1000) * qty * factor
-
         elif duct_type == "VANES":
             area = (w1 / 1000) * (2 * math.pi * (w1 / 1000) / 4) * qty
-
         elif duct_type == "ELB":
             arc = (length / 1000) * math.pi * (degree / 180)
             area = 2 * (w1 + h1) / 1000 * (((h1 / 2) / 1000) + arc) * qty * factor
 
-        # Accessories
         perimeter = w1 + h1 + w2 + h2
         nuts_bolts = (perimeter / 1000) * 8 * qty
         cleat = (perimeter / 1000) * 4 * qty
         gasket = (perimeter / 1000) * qty
         corner_pieces = 4 * qty
 
-        # Save to DB
         new_entry = MeasurementEntry(
             project_id=project_id,
             duct_no=duct_no,
@@ -217,16 +200,10 @@ def add_measurement():
         db.session.commit()
         return redirect(url_for('measurement_sheet', project_id=project_id))
 
-        except Exception as e:
-    import traceback
-    traceback.print_exc()
-    return f"Error: {str(e)}"
-
-
-
-
-
-
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return f"Error: {str(e)}"
 
 @app.route('/init_db')
 def init_db():
@@ -246,9 +223,9 @@ def init_db():
     except Exception as e:
         return f"❌ Failed: {str(e)}"
 
-
 # ========== Run ==========
 if __name__ == '__main__':
     with app.app_context():
         db.create_all()
     app.run(debug=True)
+    
