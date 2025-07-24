@@ -45,7 +45,7 @@ class MeasurementEntry(db.Model):
     h1 = db.Column(db.Float, default=0)
     w2 = db.Column(db.Float, default=0)
     h2 = db.Column(db.Float, default=0)
-    offset = db.Column(db.Float, default=0)
+    offset=safe_float(request.form.get('degree')),
     length = db.Column(db.Float, default=0)
     qty = db.Column(db.Integer, default=1)
     factor = db.Column(db.Float, default=1.0)
