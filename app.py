@@ -212,33 +212,41 @@ def measurement_sheet(project_id):
 
     project = Project.query.get_or_404(project_id)
 
+    # Helper functions to safely convert form inputs
+    def safe_float(value, default=0.0):
+        try:
+            return float(value)
+        except (ValueError, TypeError):
+            return default
+
+    def safe_int(value, default=0):
+        try:
+            return int(value)
+        except (ValueError, TypeError):
+            return default
+
     if request.method == 'POST':
         try:
-            # Helper to safely convert form inputs
-            def safe_float(value):
-                return float(value) if value.strip() else 0.0
-
-            def safe_int(value):
-                return int(value) if value.strip() else 0
-
             new_entry = MeasurementEntry(
                 project_id=project_id,
                 duct_no=request.form.get('duct_no', ''),
                 duct_type=request.form.get('duct_type', ''),
-                w1=safe_float(request.form.get('w1', '0')),
-                h1=safe_float(request.form.get('h1', '0')),
-                w2=safe_float(request.form.get('w2', '0')),
-                h2=safe_float(request.form.get('h2', '0')),
-                degree=request.form.get('degree', ''),
-                length=safe_float(request.form.get('length', '0')),
-                qty=safe_int(request.form.get('qty', '0')),
-                factor=safe_float(request.form.get('factor', '1'))
+                w1=safe_float(request.form.get('w1')),
+                h1=safe_float(request.form.get('h1')),
+                w2=safe_float(request.form.get('w2')),
+                h2=safe_float(request.form.get('h2')),
+                degree=request.form.get('degree_offset', ''),
+                length=safe_float(request.form.get('length_radius')),
+                qty=safe_int(request.form.get('quantity')),
+                factor=safe_float(request.form.get('factor', 1))
             )
 
+            # Apply backend formulas based on duct type
             apply_duct_calculation(new_entry)
 
             db.session.add(new_entry)
             db.session.commit()
+
             return redirect(url_for('measurement_sheet', project_id=project_id))
 
         except Exception as e:
@@ -247,22 +255,20 @@ def measurement_sheet(project_id):
             return f"Error: {str(e)}"
 
     measurements = MeasurementEntry.query.filter_by(project_id=project_id).all()
+
+    # Totals for live table
+    total_area = sum(m.area for m in measurements)
+    total_qty = sum(m.qty for m in measurements)
+
     return render_template(
         'measurement_sheet.html',
         project=project,
-        project_id=project_id,
         measurements=measurements,
-        total_qty=sum(m.qty for m in measurements),
-        total_area=sum(m.area or 0 for m in measurements),
-        total_24g=sum(m.g24 or 0 for m in measurements),
-        total_22g=sum(m.g22 or 0 for m in measurements),
-        total_20g=sum(m.g20 or 0 for m in measurements),
-        total_18g=sum(m.g18 or 0 for m in measurements),
-        total_bolts=sum(m.bolts or 0 for m in measurements),
-        total_cleat=sum(m.cleat or 0 for m in measurements),
-        total_gasket=sum(m.gasket or 0 for m in measurements),
-        total_corner=sum(m.corner or 0 for m in measurements)
+        total_area=total_area,
+        total_qty=total_qty
     )
+
+
 @app.route('/init_db')
 def init_db():
     try:
