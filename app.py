@@ -9,9 +9,6 @@ app.secret_key = 'your_secret_key'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///ducting.db'
 db = SQLAlchemy(app)
 
-with app.app_context():
-    db.create_all()
-
 # Models
 class Vendor(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -45,7 +42,7 @@ class MeasurementEntry(db.Model):
     gasket = db.Column(db.Float, default=0.0)
     corner_pieces = db.Column(db.Integer, default=0)
 
-# Safe converters
+# Helpers
 def safe_float(val):
     try:
         return float(val)
@@ -58,7 +55,6 @@ def safe_int(val):
     except:
         return 0
 
-# Apply duct calculation
 def apply_duct_calculation(entry):
     w1, h1, w2, h2 = entry.w1, entry.h1, entry.w2, entry.h2
     qty, factor = entry.qty, entry.factor
