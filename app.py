@@ -106,7 +106,7 @@ def dashboard():
     projects = Project.query.all()
     return render_template('dashboard.html', projects=projects)
 
-@app.route('/add_project', methods=['POST'])
+@app.route('/add_project', methods=['POST'], endpoint='new_project')
 def add_project():
     name = request.form['name']
     location = request.form['location']
@@ -115,7 +115,6 @@ def add_project():
     db.session.add(new_project)
     db.session.commit()
     return redirect(url_for('dashboard'))
-
 @app.route('/vendors')
 def vendors():
     vendor_list = Vendor.query.all()
