@@ -45,7 +45,7 @@ class MeasurementEntry(db.Model):
     h1 = db.Column(db.Float, default=0)
     w2 = db.Column(db.Float, default=0)
     h2 = db.Column(db.Float, default=0)
-    offset = db.Column(db.Float, default=0)  # renamed from 'degree'
+    degree = db.Column(db.Float, default=0)  # ✅ Correct field name
     length = db.Column(db.Float, default=0)
     qty = db.Column(db.Integer, default=1)
     factor = db.Column(db.Float, default=1.0)
@@ -54,6 +54,8 @@ class MeasurementEntry(db.Model):
     cleat = db.Column(db.Float, default=0.0)
     gasket = db.Column(db.Float, default=0.0)
     corner_pieces = db.Column(db.Integer, default=0)
+
+
 # ========== USERS ==========
 
 users = {
@@ -213,7 +215,6 @@ def measurement_sheet(project_id):
 
     project = Project.query.get_or_404(project_id)
 
-    # Helper functions to safely convert form inputs
     def safe_float(value, default=0.0):
         try:
             return float(value)
@@ -236,14 +237,13 @@ def measurement_sheet(project_id):
                 h1=safe_float(request.form.get('h1')),
                 w2=safe_float(request.form.get('w2')),
                 h2=safe_float(request.form.get('h2')),
-                degree=safe_float(request.form.get('degree')),          # fixed
-                length=safe_float(request.form.get('length')),          # fixed
-                qty=safe_int(request.form.get('qty')),                  # fixed
+                degree=safe_float(request.form.get('degree')),
+                length=safe_float(request.form.get('length')),
+                qty=safe_int(request.form.get('qty')),
                 factor=safe_float(request.form.get('factor', 1))
             )
 
-            # Apply backend formulas based on duct type
-            apply_duct_calculation(new_entry)
+            apply_duct_calculation(new_entry)  # Your backend formulas
 
             db.session.add(new_entry)
             db.session.commit()
@@ -257,7 +257,6 @@ def measurement_sheet(project_id):
 
     measurements = MeasurementEntry.query.filter_by(project_id=project_id).all()
 
-    # Totals for live table
     total_area = sum(m.area for m in measurements)
     total_qty = sum(m.qty for m in measurements)
 
