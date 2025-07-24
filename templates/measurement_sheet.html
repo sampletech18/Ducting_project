@@ -30,7 +30,7 @@
           <div class="row g-2">
             <div class="col-md-2"><input name="duct_no" class="form-control" placeholder="Duct No" required></div>
             <div class="col-md-2">
-              <select name="duct_type" class="form-select" required>
+              <select name="type" class="form-select" required>
                 <option value="">Type</option>
                 <option value="ST">ST</option>
                 <option value="RED">RED</option>
@@ -71,7 +71,7 @@
             {% for m in measurements %}
             <tr>
               <td>{{ m.duct_no }}</td>
-              <td>{{ m.duct_type }}</td>
+              <td>{{ m.type }}</td>
               <td>{{ m.w1 }}</td>
               <td>{{ m.h1 }}</td>
               <td>{{ m.w2 }}</td>
