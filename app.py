@@ -205,14 +205,43 @@ def add_measurement():
         traceback.print_exc()
         return f"Error: {str(e)}"
 
-@app.route('/measurement_sheet/<int:project_id>')
+@app.route('/measurement_sheet/<int:project_id>', methods=['GET', 'POST'])
 def measurement_sheet(project_id):
     if 'username' not in session:
         return redirect(url_for('login'))
 
     project = Project.query.get_or_404(project_id)
-    measurements = MeasurementEntry.query.filter_by(project_id=project_id).all()
 
+    if request.method == 'POST':
+        # Handle form submission
+        try:
+            new_entry = MeasurementEntry(
+                project_id=project_id,
+                duct_no=request.form['duct_no'],
+                type=request.form['duct_type'],
+                w1=float(request.form['w1']),
+                h1=float(request.form['h1']),
+                w2=float(request.form['w2']),
+                h2=float(request.form['h2']),
+                offset=request.form['degree_offset'],
+                length=request.form['length_radius'],
+                qty=int(request.form['quantity']),
+                factor=float(request.form.get('factor', '1'))
+            )
+
+            # Call your formula function here based on duct_type
+            apply_duct_calculation(new_entry)  # <-- implement this separately
+
+            db.session.add(new_entry)
+            db.session.commit()
+            return redirect(url_for('measurement_sheet', project_id=project_id))
+
+        except Exception as e:
+            import traceback
+            traceback.print_exc()
+            return f"Error: {str(e)}"
+
+    measurements = MeasurementEntry.query.filter_by(project_id=project_id).all()
     return render_template(
         'measurement_sheet.html',
         project=project,
