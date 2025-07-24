@@ -177,5 +177,10 @@ def export_measurements(project_id):
     output.seek(0)
     return output.getvalue()
 
+@app.route('/init_db')
+def init_db():
+    db.create_all()
+    return "Database tables created successfully!"
+
 if __name__ == '__main__':
     app.run(debug=True)
