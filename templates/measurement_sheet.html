@@ -50,7 +50,7 @@
             <div class="col-md-2"><input name="qty" type="number" class="form-control" placeholder="Qty"></div>
             <div class="col-md-2"><input name="factor" type="number" class="form-control" placeholder="Factor"></div>
             <div class="col-md-2">
-              <button class="btn btn-success w-100" type="submit">Add</button>
+              <form method="post" action="{{ url_for('add_measurement') }}">
             </div>
           </div>
         </form>
