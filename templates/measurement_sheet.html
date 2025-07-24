@@ -1,127 +1,168 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Measurement Sheet</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <style>
-    .form-section { background: #f1f1f1; padding: 20px; border-radius: 8px; }
-    .table-section { margin-top: 20px; overflow-x: auto; }
-    .autocad-box { background: #e8e8e8; height: 400px; display: flex; align-items: center; justify-content: center; border: 1px dashed #aaa; }
+    .form-section {
+      background: #f8f9fa;
+      border-radius: 10px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+    .table-responsive {
+      max-height: 400px;
+      overflow-y: auto;
+    }
+    .cad-viewer {
+      height: 500px;
+      border: 1px solid #ccc;
+      background: #e9ecef;
+      border-radius: 10px;
+      padding: 10px;
+      text-align: center;
+    }
   </style>
 </head>
-<body class="container-fluid mt-4">
-
-  <h3 class="mb-4">Measurement Sheet</h3>
+<body>
+<div class="container-fluid mt-4">
   <div class="row">
-    <!-- Left: AutoCAD viewer and upload -->
+    <!-- Left Side: AutoCAD Viewer and Upload -->
     <div class="col-md-4">
-      <div class="autocad-box">AutoCAD Viewer</div>
-      <form method="post" action="/upload_drawing" enctype="multipart/form-data" class="mt-3">
-        <input type="file" name="cad_file" class="form-control mb-2">
-        <button type="submit" class="btn btn-primary w-100">Upload Drawing</button>
-      </form>
-    </div>
-
-    <!-- Right: Form -->
-    <div class="col-md-8">
       <div class="form-section">
-        <form method="post" action="{{ url_for('measurement_sheet', project_id=project.id) }}">
-          <div class="row g-2">
-            <div class="col-md-2"><input name="duct_no" class="form-control" placeholder="Duct No" required></div>
-            <div class="col-md-2">
-              <select name="type" class="form-select" required>
-                <option value="">Type</option>
-                <option value="ST">ST</option>
-                <option value="RED">RED</option>
-                <option value="DM">DM</option>
-                <option value="OFFSET">OFFSET</option>
-                <option value="SHOE">SHOE</option>
-                <option value="VANES">VANES</option>
-                <option value="ELB">ELB</option>
-              </select>
-            </div>
-            <div class="col-md-2"><input name="w1" type="number" class="form-control" placeholder="W1"></div>
-            <div class="col-md-2"><input name="h1" type="number" class="form-control" placeholder="H1"></div>
-            <div class="col-md-2"><input name="w2" type="number" class="form-control" placeholder="W2"></div>
-            <div class="col-md-2"><input name="h2" type="number" class="form-control" placeholder="H2"></div>
-            <div class="col-md-2"><input name="degree" type="number" class="form-control" placeholder="Degree"></div>
-            <div class="col-md-2"><input name="length" type="number" class="form-control" placeholder="Length"></div>
-            <div class="col-md-2"><input name="qty" type="number" class="form-control" placeholder="Qty"></div>
-            <div class="col-md-2"><input name="factor" type="number" class="form-control" placeholder="Factor"></div>
-            <div class="col-md-2">
-              <button class="btn btn-success w-100" type="submit">Add</button>
-            </div>
+        <h5>AutoCAD Viewer</h5>
+        <div class="cad-viewer">
+          <p>[AutoCAD drawing preview here]</p>
+        </div>
+        <form method="post" enctype="multipart/form-data" class="mt-3">
+          <div class="mb-3">
+            <label for="revisionFile" class="form-label">Upload Revision</label>
+            <input class="form-control" type="file" id="revisionFile" name="revision_file">
           </div>
+          <button type="submit" class="btn btn-sm btn-secondary">Upload</button>
         </form>
       </div>
+    </div>
 
-      <!-- Live Table -->
-      <div class="table-section">
-        <table class="table table-bordered table-striped mt-4">
-          <thead class="table-dark">
-            <tr>
-              <th>Duct No</th><th>Type</th><th>W1</th><th>H1</th><th>W2</th><th>H2</th>
-              <th>Deg</th><th>Len</th><th>Qty</th><th>Factor</th><th>Area</th>
-              <th>24g</th><th>22g</th><th>20g</th><th>18g</th>
-              <th>Nuts & Bolts</th><th>Cleat</th><th>Gasket</th><th>Corner</th><th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for m in measurements %}
-            <tr>
-              <td>{{ m.duct_no }}</td>
-              <td>{{ m.type }}</td>
-              <td>{{ m.w1 }}</td>
-              <td>{{ m.h1 }}</td>
-              <td>{{ m.w2 }}</td>
-              <td>{{ m.h2 }}</td>
-              <td>{{ m.degree }}</td>
-              <td>{{ m.length }}</td>
-              <td>{{ m.qty }}</td>
-              <td>{{ m.factor }}</td>
-              <td>{{ m.area }}</td>
-              <td>{{ m.g24 }}</td>
-              <td>{{ m.g22 }}</td>
-              <td>{{ m.g20 }}</td>
-              <td>{{ m.g18 }}</td>
-              <td>{{ m.bolts }}</td>
-              <td>{{ m.cleat }}</td>
-              <td>{{ m.gasket }}</td>
-              <td>{{ m.corner }}</td>
-              <td>
-                <a href="/edit_entry/{{ m.id }}" class="btn btn-sm btn-warning">Edit</a>
-                <a href="/delete_entry/{{ m.id }}" class="btn btn-sm btn-danger">Delete</a>
-              </td>
-            </tr>
-            {% endfor %}
-          </tbody>
-          <tfoot class="table-secondary">
-            <tr>
-              <th colspan="8" class="text-end">Total</th>
-              <th>{{ total_qty }}</th>
-              <th></th>
-              <th>{{ total_area }}</th>
-              <th>{{ total_24g }}</th>
-              <th>{{ total_22g }}</th>
-              <th>{{ total_20g }}</th>
-              <th>{{ total_18g }}</th>
-              <th>{{ total_bolts }}</th>
-              <th>{{ total_cleat }}</th>
-              <th>{{ total_gasket }}</th>
-              <th>{{ total_corner }}</th>
-              <th></th>
-            </tr>
-          </tfoot>
-        </table>
+    <!-- Right Side: Duct Entry Form -->
+    <div class="col-md-8">
+      <form method="POST" class="form-section">
+        <h5>Add Duct Entry</h5>
+        <div class="row g-2">
+          <div class="col-md-3">
+            <input type="text" class="form-control" name="duct_no" placeholder="Duct No" required>
+          </div>
+          <div class="col-md-3">
+            <select class="form-select" name="type" required>
+              <option value="">Type</option>
+              <option value="ST">ST</option>
+              <option value="SR">SR</option>
+              <option value="DT">DT</option>
+              <option value="BO">BO</option>
+              <option value="RE">RE</option>
+              <option value="RD">RD</option>
+              <option value="TR">TR</option>
+            </select>
+          </div>
+          <div class="col-md-2">
+            <input type="number" step="0.01" class="form-control" name="w1" placeholder="W1">
+          </div>
+          <div class="col-md-2">
+            <input type="number" step="0.01" class="form-control" name="h1" placeholder="H1">
+          </div>
+          <div class="col-md-2">
+            <input type="number" step="0.01" class="form-control" name="w2" placeholder="W2">
+          </div>
+          <div class="col-md-2">
+            <input type="number" step="0.01" class="form-control" name="h2" placeholder="H2">
+          </div>
+          <div class="col-md-2">
+            <input type="number" step="0.01" class="form-control" name="degree" placeholder="Degree/Offset">
+          </div>
+          <div class="col-md-2">
+            <input type="number" step="0.01" class="form-control" name="length" placeholder="Length/Radius">
+          </div>
+          <div class="col-md-2">
+            <input type="number" class="form-control" name="qty" placeholder="Qty" value="1">
+          </div>
+          <div class="col-md-2">
+            <input type="number" step="0.01" class="form-control" name="factor" placeholder="Factor" value="1">
+          </div>
+        </div>
+        <div class="mt-3 d-flex gap-2">
+          <button type="submit" class="btn btn-success">Add Entry</button>
+          <button type="reset" class="btn btn-secondary">Cancel</button>
+        </div>
+      </form>
 
-        <div class="d-flex gap-2 mt-2">
-          <a href="/export_measurements/{{ project_id }}" class="btn btn-outline-primary">Export</a>
-          <a href="/submit_measurements/{{ project_id }}" class="btn btn-outline-success">Submit</a>
-          <button onclick="window.print()" class="btn btn-outline-dark">Print</button>
+      <!-- Measurement Table -->
+      <div class="form-section">
+        <h5>Live Measurement Table</h5>
+        <div class="table-responsive">
+          <table class="table table-bordered table-sm text-center">
+            <thead class="table-light">
+              <tr>
+                <th>Duct No</th>
+                <th>Type</th>
+                <th>W1</th>
+                <th>H1</th>
+                <th>W2</th>
+                <th>H2</th>
+                <th>Degree</th>
+                <th>Length</th>
+                <th>Qty</th>
+                <th>Area</th>
+                <th>24g</th>
+                <th>22g</th>
+                <th>20g</th>
+                <th>18g</th>
+                <th>Nuts/Bolts</th>
+                <th>Cleat</th>
+                <th>Gasket</th>
+                <th>Corner</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for m in measurements %}
+              <tr>
+                <td>{{ m.duct_no }}</td>
+                <td>{{ m.type }}</td>
+                <td>{{ m.w1 }}</td>
+                <td>{{ m.h1 }}</td>
+                <td>{{ m.w2 }}</td>
+                <td>{{ m.h2 }}</td>
+                <td>{{ m.degree }}</td>
+                <td>{{ m.length }}</td>
+                <td>{{ m.qty }}</td>
+                <td>{{ m.area }}</td>
+                <td>{{ m.g24 }}</td>
+                <td>{{ m.g22 }}</td>
+                <td>{{ m.g20 }}</td>
+                <td>{{ m.g18 }}</td>
+                <td>{{ m.nuts_bolts }}</td>
+                <td>{{ m.cleat }}</td>
+                <td>{{ m.gasket }}</td>
+                <td>{{ m.corner_pieces }}</td>
+                <td>
+                  <a href="#" class="btn btn-sm btn-warning">Edit</a>
+                  <a href="#" class="btn btn-sm btn-danger">Delete</a>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+
+        <div class="mt-3 d-flex gap-2">
+          <button class="btn btn-primary">Export</button>
+          <button class="btn btn-info">Submit</button>
+          <button class="btn btn-outline-dark" onclick="window.print()">Print</button>
         </div>
       </div>
     </div>
   </div>
+</div>
 </body>
-</html>
+                  </html>
