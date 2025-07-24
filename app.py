@@ -205,6 +205,8 @@ def add_measurement():
         traceback.print_exc()
         return f"Error: {str(e)}"
 
+
+
 @app.route('/measurement_sheet/<int:project_id>', methods=['GET', 'POST'])
 def measurement_sheet(project_id):
     if 'username' not in session:
@@ -226,20 +228,21 @@ def measurement_sheet(project_id):
             return default
 
     if request.method == 'POST':
-    try:
-        new_entry = MeasurementEntry(
-            project_id=project_id,
-            duct_no=request.form.get('duct_no', ''),
-            type=request.form.get('type', ''),
-            w1=safe_float(request.form.get('w1')),
-            h1=safe_float(request.form.get('h1')),
-            w2=safe_float(request.form.get('w2')),
-            h2=safe_float(request.form.get('h2')),
-            degree=safe_float(request.form.get('degree')),          # fixed
-            length=safe_float(request.form.get('length')),          # fixed
-            qty=safe_int(request.form.get('qty')),                  # fixed
-            factor=safe_float(request.form.get('factor', 1))
-        )
+        try:
+            new_entry = MeasurementEntry(
+                project_id=project_id,
+                duct_no=request.form.get('duct_no', ''),
+                type=request.form.get('type', ''),
+                w1=safe_float(request.form.get('w1')),
+                h1=safe_float(request.form.get('h1')),
+                w2=safe_float(request.form.get('w2')),
+                h2=safe_float(request.form.get('h2')),
+                degree=safe_float(request.form.get('degree')),          # fixed
+                length=safe_float(request.form.get('length')),          # fixed
+                qty=safe_int(request.form.get('qty')),                  # fixed
+                factor=safe_float(request.form.get('factor', 1))
+            )
+
             # Apply backend formulas based on duct type
             apply_duct_calculation(new_entry)
 
